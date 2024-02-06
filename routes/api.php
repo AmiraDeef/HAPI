@@ -18,14 +18,15 @@ use Illuminate\Support\Facades\Route;
 
 //for guest -->just detection
 
+// Authentication Routes
+Route::post('/signup/farmer', [RegisterController::class, 'registerFarmer'])->name('signupFarmer');
+Route::post('/signup/landowner', [RegisterController::class, 'registerLandowner'])->name('signupLandowner');
+Route::post('/login', [LoginController::class, 'login'])->name('login');
 
-//for authenticated user
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Authenticated Routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
 });
-
-Route::post('/signup/farmer',[RegisterController::class,"registerFarmer"])->name('signupFarmer');
-Route::post('/signup/landowner',[RegisterController::class,"registerLandowner"])->name('signupLandowner');
-Route::post('/login',[LoginController::class,"login"])->name('login');
-Route::post('/logut',[LoginController::class,"logout"])->name('logout');
-

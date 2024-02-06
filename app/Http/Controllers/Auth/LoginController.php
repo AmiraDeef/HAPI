@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
+    /** @noinspection PhpUndefinedFieldInspection */
     public function login(LoginRequest $request): JsonResponse
     {
 // Validate the login request
@@ -42,8 +43,7 @@ class LoginController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-// Revoke the current access token
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logged out successfully']);
+        return \response()->json(['message'=>'Logged out successfully']);
     }
 }
