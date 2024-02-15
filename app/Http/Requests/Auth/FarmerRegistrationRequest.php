@@ -26,7 +26,7 @@ class FarmerRegistrationRequest extends FormRequest
             'username' => 'required|string|max:50|unique:users',
             'password' => 'required|string|min:6',
             'role' => 'required|in:farmer',
-            'land_id' => 'required|exists:farms,unique_farm_id',
+            'land_id' => 'required|exists:lands,unique_land_id',
         ];
     }
 }

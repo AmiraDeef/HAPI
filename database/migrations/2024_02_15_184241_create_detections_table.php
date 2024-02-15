@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('detections', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('farm_id');
+            $table->unsignedBigInteger('land_id');
             $table->json('detection'); //not sure about this yet
             $table->string('image');
             $table->timestamp('detected_at')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('farm_id')->references('id')->on('farms')->onDelete('cascade');
+            $table->foreign('land_id')->references('id')->on('lands')->onDelete('cascade');
 
         });
     }

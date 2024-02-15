@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Farm extends Model
+class Land extends Model
 {
     use HasFactory;
     protected $fillable=[
-        'unique_farm_id'
+        'unique_land_id'
     ];
     public function landowner(): BelongsTo
     {

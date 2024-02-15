@@ -16,7 +16,7 @@ class Landowner extends Model
     use HasFactory;
     protected $fillable=[
         'user_id',
-        'unique_farm_id',
+        'unique_land_id',
     ];
 
     public function farmers(): HasMany
@@ -27,8 +27,8 @@ class Landowner extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function farm(): HasOne
+    public function land(): HasOne
     {
-        return $this->hasOne(Farm::class);
+        return $this->hasOne(Land::class);
     }
 }

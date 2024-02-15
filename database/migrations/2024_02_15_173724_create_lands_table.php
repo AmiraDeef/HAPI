@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('farms', function (Blueprint $table) {
+        Schema::create('lands', function (Blueprint $table) {
             $table->id();
-            $table->string('unique_farm_id',8)->unique();
+            $table->string('unique_land_id',8)->unique();
             $table->unsignedBigInteger('landowner_id')->unique();
+            $table->unsignedBigInteger('crop_id')->unique()->nullable();
             $table->timestamps();
             $table->foreign('landowner_id')->references('id')->on('landowners')->onDelete('cascade');
         });
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('farms');
+        Schema::dropIfExists('lands');
     }
 };

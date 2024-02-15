@@ -10,7 +10,7 @@ class Detection extends Model
 {
     use HasFactory;
     protected $fillable=[
-        'user_id','farm_id','image','detection','detected_at'
+        'user_id','land_id','image','detection','detected_at'
     ];
     public $timestamps = false;
 
@@ -20,9 +20,9 @@ class Detection extends Model
     }
 
 
-    public function farm(): BelongsTo
+    public function land(): BelongsTo
     {
-        return $this->belongsTo(Farm::class);
+        return $this->belongsTo(Land::class);
     }
 
 

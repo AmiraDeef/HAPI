@@ -27,7 +27,7 @@ class RegisterController extends Controller
     {
         return Farmer::create([
             'user_id' => $user->id,
-            'farm_id' => $farmer_data['farm_id'],
+            'land_id' => $farmer_data['land_id'],
         ]);
 
     }
@@ -81,7 +81,7 @@ class RegisterController extends Controller
         $success= [
             'token'=>$token,
             'username'=>$user->username,
-            'land_id'=>$landowner->farm['unique_farm_id']
+            'land_id'=>$landowner->land['unique_land_id']
 
         ];
         return response()->json($success);

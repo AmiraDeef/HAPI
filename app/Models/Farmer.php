@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Farm;
+use App\Models\Land;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @method static create(array $array)
@@ -13,12 +14,12 @@ class Farmer extends Model
 {
     use HasFactory;
     protected $fillable=[
-        'farm_id','user_id'
+        'land_id','user_id'
         ];
 
-    public function farm()
+    public function land(): BelongsTo
     {
-        return $this->belongsTo(Farm::class);
+        return $this->belongsTo(Land::class);
     }
     public function user()
     {
