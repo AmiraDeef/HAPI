@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class FarmerRegistrationRequest extends FormRequest
+class ImageRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +22,7 @@ class FarmerRegistrationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'phone_number' => 'required|string|max:11|unique:users,phone_number',
-            'username' => 'required|string|max:50|unique:users',
-            'password' => 'required|string|min:6',
-            'role' => 'required|in:farmer',
-            'land_id' => 'required|exists:farms,unique_farm_id',
+            'image' =>'mimes:jpeg,png,jpg|required|max:10000',//10MB
         ];
     }
 }

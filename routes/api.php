@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\DetectionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,7 +18,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//for guest -->just detection
+//for guest detection
+
+Route::post('/detect', [DetectionController::class, 'detectImageForGuest'])->name('detectImageForGuest');
+
 
 // Authentication Routes
 Route::post('/signup/farmer', [RegisterController::class, 'registerFarmer'])->name('signupFarmer');

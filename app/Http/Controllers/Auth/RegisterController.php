@@ -54,7 +54,7 @@ class RegisterController extends Controller
             return response()->json(data: ['error'=>$request->validator->errors()->messages()], status: 422);
         }
         $user = $this->registerUser($request->only(['username', 'phone_number', 'password','role']));
-        $this->createFarmer($user,$request->only(['farm_id']));
+        $this->createFarmer($user,$request->only(['land_id']));
 
         $token=$this->generateToken($user);
         $success= [
@@ -81,7 +81,7 @@ class RegisterController extends Controller
         $success= [
             'token'=>$token,
             'username'=>$user->username,
-            'farm_id'=>$landowner->farm['unique_farm_id']
+            'land_id'=>$landowner->farm['unique_farm_id']
 
         ];
         return response()->json($success);

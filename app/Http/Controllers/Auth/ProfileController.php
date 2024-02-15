@@ -21,7 +21,7 @@ class ProfileController extends Controller
         //rest previous history
 
         // crop selection but this after build crop controller ")
-        return response()->json(['message' => 'crop changed succsessfuly']);
+        return response()->json(['message' => 'crop changed successfully']);
     }
     public function deleteAccount(Request $request): JsonResponse
     {
