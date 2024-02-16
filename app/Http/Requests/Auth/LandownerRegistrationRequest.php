@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class LandownerRegistrationRequest extends FormRequest
 {
@@ -23,11 +24,19 @@ class LandownerRegistrationRequest extends FormRequest
     {
         return [
 
-            'phone_number' => 'required|string|max:11|unique:users,phone_number',
+            'phone_number' =>['required','digits:11','numeric','unique:users,phone_number'] ,
             'username' => 'required|string|max:50|unique:users',
             'password' => 'required|string|min:6',
             'role' => 'required|in:landowner',
+        ];
 
+    }
+    public function messages()
+    {
+        return [
+            'phone_number.digits:11' => 'Please enter a valid phone number (11 digits).',
+
+            // ... other message overrides ...
         ];
     }
 }

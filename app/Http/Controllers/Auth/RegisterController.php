@@ -10,6 +10,7 @@ use App\Models\Farmer;
 use App\Models\Landowner;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Client\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 
@@ -68,10 +69,23 @@ class RegisterController extends Controller
     public function registerLandowner(LandownerRegistrationRequest $request): JsonResponse
     {
 
-        $validated_data=$request->validated();
+        $validated_data = $request->validated();
+
         if(!$validated_data){
-            return response()->json(data: ['error'=>$request->validator->errors()->messages()], status: 422);
+            return response()->json(data: ['errors'=>$request->validator->errors()->messages()], status: 422);
         }
+
+//        if (!$validated_data) {
+//            $errors = [];
+//            foreach ($request->validator->errors()->messages() as $field => $messages) {
+//                // Access and display the first error only
+//                    unset($errors['message']);
+//                $errors[$field] = $messages[0];
+//            }
+//            //return one error for each field
+//            return response()->json(['errors' => $errors], 422);
+//        }
+
         $user = $this->registerUser($request->only(['username', 'phone_number', 'password','role']));
         $landowner = $this->createLandowner($user);
         event(new Registered($user));
