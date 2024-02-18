@@ -25,6 +25,9 @@ class ProfileController extends Controller
     }
     public function deleteAccount(Request $request): JsonResponse
     {
+        if (!Hash::check($request->input('password'), Auth::user()->password)) {
+            return response()->json(['error' => 'Incorrect password'], 401);
+        }
         $request->user()->delete();
         return response()->json(['message' => 'Account deleted successfully']);
     }

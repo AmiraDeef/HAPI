@@ -11,7 +11,8 @@ class Land extends Model
 {
     use HasFactory;
     protected $fillable=[
-        'unique_land_id'
+        'unique_land_id',
+        'crop_id',
     ];
     public function landowner(): BelongsTo
     {
@@ -25,5 +26,14 @@ class Land extends Model
     public function detections(): HasMany
     {
         return $this->hasMany(Detection::class);
+    }
+    public function crops()
+    {
+        return $this->belongsTo(Crop::class);
+    }
+
+    public function cropHistory()
+    {
+        return $this->hasMany(LandCropHistory::class);
     }
 }

@@ -26,6 +26,7 @@ class LoginController extends Controller
             $responseData = [
                 'token' => $token,
                 'username'=>$user->username,
+                'role' => $user->role,
 
             ];
 
@@ -37,8 +38,8 @@ class LoginController extends Controller
             return response()->json($responseData);
         }
 
-// Invalid credentials
-        return response()->json(['error' => 'Invalid credentials'], 401);
+        // Invalid credentials
+        return response()->json(['message' => 'Invalid Number or password'], 401);
     }
 
     public function logout(Request $request): JsonResponse

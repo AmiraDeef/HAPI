@@ -61,6 +61,7 @@ class RegisterController extends Controller
         $success= [
         'token'=>$token,
             'username'=>$user->username,
+            'land_id'=>$request->land_id
 
         ];
         return response()->json($success);
