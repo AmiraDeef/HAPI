@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Crop;
 
 use App\Http\Controllers\Controller;
 use App\Models\Crop;
+use App\Models\CropLandHistory;
+use http\Message;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,22 +22,22 @@ class SelectingManualController extends Controller
         if(! Auth::user()->role == 'landowner'){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-        $crop=Crop::findOrCreate(['crop_name'=>$request->input('crop')]);
+        $crop=Crop::findOrCreate(['name'=>$request->input('crop')]);
         //get the land of the landowner
         $land = Auth::user()->landowner->land;
-        LandCropHistory::create([
+        CropLandHistory::create([
             'land_id' => $land->id,
             'crop_id' => $crop->id,
-            'start_date' => Carbon::now(),
+            'planted_at' => Carbon::now(),
         ]);
         $land->crop_id = $crop->id;
         $land->save();
 
         //send to iot using mqtt
-        $this->updateToIot($land->unique_land_id, $crop->crop_name);
+       // $this->updateToIot($land->unique_land_id, $crop->crop_name);
 
         //when receiving info crop npk from iot ,then add them to response
-        return response()->json('the chosen crop is'.$crop);
+        return response()->json(['message'=>"the chosen crop is ".$crop->name], 200);
 
 
     }

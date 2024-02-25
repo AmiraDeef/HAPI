@@ -9,11 +9,21 @@ class Crop extends Model
 {
     use HasFactory;
     protected $fillable=[
-        'crop_name',
-
+        'name',
         'crop_description',
 
     ];
+
+    public static function findOrCreate(array $attributes)
+    {
+        $crop = self::where($attributes)->first();
+
+        if (!$crop) {
+            $crop = self::create($attributes);
+        }
+
+        return $crop;
+    }
     public function detection()
     {
         return $this->hasMany(Detection::class);
@@ -24,6 +34,6 @@ class Crop extends Model
     }
     public function landHistory()
     {
-        return $this->hasMany(LandCropHistory::class);
+        return $this->hasMany(CropLandHistory::class);
     }
 }

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('crop_land_history', function (Blueprint $table) {
+        Schema::create('crop_land_histories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('land_id');
             $table->unsignedBigInteger('crop_id');
@@ -20,10 +20,9 @@ return new class extends Migration
             $table->decimal('nitrogen_applied', 8, 2)->nullable();
             $table->decimal('phosphorus_applied', 8, 2)->nullable();
             $table->decimal('potassium_applied', 8, 2)->nullable();
-            $table->foreign('land_id')->references('id')->on('lands')->onDelete('cascade');
-            $table->foreign('crop_id')->references('id')->on('crops')->onDelete('cascade');
+            $table->foreign('land_id')->references('id')->on('lands');
+            $table->foreign('crop_id')->references('id')->on('crops') ;
         });
-
     }
 
     /**
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('crop_land_history');
+        Schema::dropIfExists('crop_land_histories');
     }
 };

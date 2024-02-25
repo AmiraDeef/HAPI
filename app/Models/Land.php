@@ -34,6 +34,6 @@ class Land extends Model
 
     public function cropHistory()
     {
-        return $this->hasMany(LandCropHistory::class);
+        return $this->hasMany(CropLandHistory::class);
     }
 }

@@ -5,15 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LandCropHistory extends Model
+class CropLandHistory extends Model
 {
     use HasFactory;
     protected $fillable=[
         'land_id',
         'crop_id',
-        'start_date',
-        'end_date',
+        'planted_at',
+        'harvested_at',
     ];
+    public $timestamps = false;
     public function land()
     {
         return $this->belongsTo(Land::class);
