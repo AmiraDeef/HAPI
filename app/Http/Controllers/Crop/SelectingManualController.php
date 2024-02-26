@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection ALL */
 
 namespace App\Http\Controllers\Crop;
 
@@ -10,6 +10,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use carbon\carbon;
+use Illuminate\Support\Facades\Log;
+use PhpMqtt\Client\MqttClient;
+use PhpMqtt\Client\Facades\MQTT;
 
 class SelectingManualController extends Controller
 {
@@ -19,12 +22,19 @@ class SelectingManualController extends Controller
         $request->validate([
             'crop'=>'required|string'
         ]);
-        if(! Auth::user()->role == 'landowner'){
+        if(Auth::user()->role !== 'landowner'){
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-        $crop=Crop::findOrCreate(['name'=>$request->input('crop')]);
         //get the land of the landowner
         $land = Auth::user()->landowner->land;
+        $existing_history = CropLandHistory::where('land_id', $land->id)
+            ->orderBy('planted_at', 'desc')
+            ->first();
+        if($existing_history){
+                return response()->json(['message' => 'Duplicate request received. Please try again later.'], 429);
+        }
+        $crop=Crop::findOrCreate(['name'=>$request->input('crop')]);
+
         CropLandHistory::create([
             'land_id' => $land->id,
             'crop_id' => $crop->id,
@@ -33,25 +43,26 @@ class SelectingManualController extends Controller
         $land->crop_id = $crop->id;
         $land->save();
 
-        //send to iot using mqtt
-       // $this->updateToIot($land->unique_land_id, $crop->crop_name);
+        // Send the chosen crop and land ID mqtt
+        try{
+            MQTT::publish(
+                "land/{$land->unique_land_id}/selected",
+                json_encode([
+                    'land_id' => $land->unique_land_id,
+                    'crop' => $crop->name,
+                ])
+            );
+        }catch (\Exception $e) {
+            Log::error('Error publishing MQTT message: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to publish MQTT message'], 500);
+        }
 
-        //when receiving info crop npk from iot ,then add them to response
         return response()->json(['message'=>"the chosen crop is ".$crop->name], 200);
 
 
     }
 
-    public function store(Request $request)
-    {
-        //saving the crop in db
 
-
-    }
-     public function updateToIot($land_id, $crop){
-
-
-    }
 
 }
 
