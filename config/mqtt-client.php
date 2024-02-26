@@ -35,8 +35,9 @@ return [
         'default' => [
 
             // The host and port to which the client shall connect.
-            'host' => env('MQTT_HOST'),
-            'port' => env('MQTT_PORT', 1883),
+            'host' => env('MQTT_HOST',"df29f9cf7a6e4800b2e1d6f713a91f1d.s1.eu.hivemq.cloud"),
+            'port' => env('MQTT_PORT', 8883),
+
 
             // The MQTT protocol version used for the connection.
             'protocol' => MqttClient::MQTT_3_1,
@@ -69,7 +70,7 @@ return [
 
                 // The TLS settings used for the connection. Must match the specified port.
                 'tls' => [
-                    'enabled' => env('MQTT_TLS_ENABLED', false),
+                    'enabled' => env('MQTT_TLS_ENABLED', true),
                     'allow_self_signed_certificate' => env('MQTT_TLS_ALLOW_SELF_SIGNED_CERT', false),
                     'verify_peer' => env('MQTT_TLS_VERIFY_PEER', true),
                     'verify_peer_name' => env('MQTT_TLS_VERIFY_PEER_NAME', true),
@@ -82,8 +83,8 @@ return [
 
                 // Credentials used for authentication and authorization.
                 'auth' => [
-                    'username' => env('MQTT_AUTH_USERNAME'),
-                    'password' => env('MQTT_AUTH_PASSWORD'),
+                    'username' => env('MQTT_AUTH_USERNAME','hapiii'),
+                    'password' => env('MQTT_AUTH_PASSWORD','Hapiii12345'),
                 ],
 
                 // Can be used to declare a last will during connection. The last will
