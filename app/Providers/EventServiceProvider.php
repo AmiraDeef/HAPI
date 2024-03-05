@@ -20,6 +20,9 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
             LandownerCreatedListener::class,
         ],
+        'App\Events\LandInformationReceived' => [
+            'App\Listeners\ProcessLandInformation',
+        ],
     ];
 
     /**
@@ -27,7 +30,7 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        parent::boot();
     }
 
     /**
