@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Crop\DetectionController;
+use App\Http\Controllers\Crop\RecommendationController;
 use App\Http\Controllers\Crop\SelectingManualController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,7 @@ Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::middleware('auth:sanctum')->group(function () {
     //crop setup
     Route::post('/crop/selecting-manual', [SelectingManualController::class, 'selectionManually']);
+    Route::post('/crop/recommendation', [RecommendationController::class, 'recommend']);
 
 
 
