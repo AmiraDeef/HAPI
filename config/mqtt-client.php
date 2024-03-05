@@ -58,7 +58,7 @@ return [
 
             // Which logging channel to use for logs produced by the MQTT client.
             // If left empty, the default log channel or stack is being used.
-            'log_channel' => env('MQTT_LOG_CHANNEL', null),
+            'log_channel' => env('MQTT_LOG_CHANNEL', 'df29f9cf7a6e4800b2e1d6f713a91f1d.s1.eu.hivemq.cloud'),
 
             // Defines which repository implementation shall be used. Currently,
             // only a MemoryRepository is supported.
