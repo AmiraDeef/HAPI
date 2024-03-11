@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Crop\DetectionController;
 use App\Http\Controllers\Crop\RecommendationController;
 use App\Http\Controllers\Crop\SelectingManualController;
+use App\Http\Controllers\IOT\IotDataController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/detect', [DetectionController::class, 'detectImageForGuest'])->name('detectImageForGuest');
 
+
+//for iot
+Route::post('/iot/land-data', [IotDataController::class, 'store']);
+Route::get('/iot/land-data/{land_id}', [IotDataController::class, 'index']);
+Route::put('/iot/land-data/{land_id}', [IotDataController::class, 'update']);
+Route::delete('/iot/land-data/{land_id}', [IotDataController::class, 'destroy']);
 
 // Authentication Routes
 Route::post('/signup/farmer', [RegisterController::class, 'registerFarmer'])->name('signupFarmer');
