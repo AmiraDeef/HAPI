@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Listeners;
 
 use App\Events\LandInformationReceived;
@@ -10,38 +9,45 @@ use Illuminate\Support\Facades\Log;
 
 class ProcessLandInformation
 {
-    /**
-     * Create the event listener.
-     */
-    public function __construct()
-    {
-        //
-    }
+/**
+* Create the event listener.
+*/
+public function __construct()
+{
+//
+}
 
-    /**
-     * Handle the event.
-     */
-    public function handle(LandInformationReceived $event): void
-    {
-        $land_info = $event->land_info;
-        Log::info('Received land information: ' . json_encode($land_info));
-       // $cropRecommendations = $this->getCropRecommendation($land_info);
-      //  $this->sendCropRecommendations($cropRecommendations);
-    }
-    private function getCropRecommendation($land_info){
-        //get the crop recommendation
+/**
+* Handle the event.
+*/
+public function handle(LandInformationReceived $event): void
+{
+$landInfo = $event->land_info;
+Log::info('Received land information: ' . json_encode($landInfo));
 
-        $response = Http::post("http://127.0.0.1:5000/recommend", $land_info); //url ai
-        if (!$response->successful()) {
-            return response()->json(['error' => 'Failed to get crop recommendation.'], $response->status());
-        }
+// Get crop recommendations based on land information
+$cropRecommendations = $this->getCropRecommendation($landInfo);
 
-        return $response->json();
-    }
-    private function sendCropRecommendations($cropRecommendations){
+// Send crop recommendations along with the success message
+$this->sendCropRecommendations($cropRecommendations);
+}
 
-        //assuming that the response will be in json and with 3 top crops recommendation
-        return response()->json($cropRecommendations);
+private function getCropRecommendation($landInfo)
+{
+//get the crop recommendation
+$response = Http::post("https://e376e3b7-2a57-4420-9342-3717ad9cec0a.mock.pstmn.io/recommend-crop", $landInfo); //url ai
+if (!$response->successful()) {
+return response()->json(['error' => 'Failed to get crop recommendation.'], $response->status());
+}
+return $response->json();
+}
 
-    }
+private function sendCropRecommendations($cropRecommendations)
+{
+// Send the response with crop recommendations and success message
+return response()->json([
+'message' => 'Land information received successfully',
+'crop_recommendations' => $cropRecommendations,
+], 200);
+}
 }
