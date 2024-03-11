@@ -74,7 +74,7 @@ class DetectionController extends Controller
 //
 //
 //        // history of user->landowner but specific land detection
-//         $detection_history=Detection::where('farm_id',Auth::user()->landowner->farm_id)->get();
+//         $detection_history=Detection::where('land_id',Auth::user()->landowner->land_id)->get();
 //
 //
 
