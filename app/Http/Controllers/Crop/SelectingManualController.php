@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use carbon\carbon;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use PhpMqtt\Client\MqttClient;
 use PhpMqtt\Client\Facades\MQTT;
@@ -20,9 +21,9 @@ class SelectingManualController extends Controller
     public function selectionManually(Request $request): JsonResponse
     {
         $request->validate([
-            'crop'=>'required|string'
+            'crop' => 'required|string'
         ]);
-        if(Auth::user()->role !== 'landowner'){
+        if (Auth::user()->role !== 'landowner') {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         //get the land of the landowner
@@ -30,10 +31,10 @@ class SelectingManualController extends Controller
         $existing_history = CropLandHistory::where('land_id', $land->id)
             ->orderBy('planted_at', 'desc')
             ->first();
-        if($existing_history){
-                return response()->json(['message' => 'Duplicate request received. Please try again later.'], 429);
+        if ($existing_history) {
+            return response()->json(['message' => 'Duplicate request received. Please try again later.'], 429);
         }
-        $crop=Crop::findOrCreate(['name'=>$request->input('crop')]);
+        $crop = Crop::findOrCreate(['name' => $request->input('crop')]);
 
         CropLandHistory::create([
             'land_id' => $land->id,
@@ -43,24 +44,38 @@ class SelectingManualController extends Controller
         $land->crop_id = $crop->id;
         $land->save();
 
-        // Send the chosen crop and land ID mqtt
-        try{
-            MQTT::publish(
-                "land/{$land->unique_land_id}/selected",
-                json_encode([
+        // Send the chosen crop and land ID via http request
+            try {
+                $response = Http::post('https://your-iot-api.com/selected-crop', [
                     'land_id' => $land->unique_land_id,
                     'crop' => $crop->name,
-                ])
-            );
-        }catch (\Exception $e) {
-            Log::error('Error publishing MQTT message: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to publish MQTT message'], 500);
+                ]);
+                if ($response->successful()) {
+                    Log::error('Error sending crop selection data to IoT API:', ['response' => $response]);
+                } else {
+                    //just for test ,I'll refactor it later..
+                    switch ($response->status()) {
+                        case 400:
+                            return response()->json(['error' => 'Bad request'], 400);
+                        case 404:
+                            return response()->json(['error' => 'crop information not found'], 404);
+                        case 500:
+                            return response()->json(['error' => 'Server error'], 500);
+                        default:
+                            return response()->json(['error' => 'Failed to send choosen crop information'], $response->status());
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::error('Error processing HTTP request: ' . $e->getMessage());
+                Log::error($e->getTraceAsString());
+                return response()->json(['error' => 'Failed to process HTTP request'], 500);
+            }
+
+            return response()->json(['message' => "the chosen crop is " . $crop->name], 200);
+
+
         }
 
-        return response()->json(['message'=>"the chosen crop is ".$crop->name], 200);
-
-
-    }
 
 
 
