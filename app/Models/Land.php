@@ -36,4 +36,8 @@ class Land extends Model
     {
         return $this->hasMany(CropLandHistory::class);
     }
+    public function iot()
+    {
+        return $this->hasOne(Iot::class);
+    }
 }
