@@ -84,17 +84,13 @@ class DetectionController extends Controller
 
     //if result in json ,I should encode it first
 
-
-    public function saveDetectionResult($user_id,$result,$image){
+    public function store($user_id,$result,$image){
         $detection = new Detection();
         $detection->user_id = $user_id;
         $detection->image = $image;
         $detection->detection = json_encode($result);
         $detection->detected_at = now();
         $detection->save();
-
-
-
 
     }
 }
