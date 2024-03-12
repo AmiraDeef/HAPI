@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Iot extends Model
 {
     use HasFactory;
+    protected $table = 'iot_data';
     protected $fillable=[
         'land_id','data','created_at','updated_at'
     ];
