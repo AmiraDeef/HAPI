@@ -76,9 +76,6 @@ class SelectingManualController extends Controller
 
         }
 
-
-
-
 }
 
 
