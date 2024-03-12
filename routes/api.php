@@ -43,6 +43,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/crop/selecting-manual', [SelectingManualController::class, 'selectionManually']);
     Route::post('/crop/recommendation', [RecommendationController::class, 'recommend']);
 
+    //detection
+    Route::post('/detect', [DetectionController::class, 'detectImage'])->name('detectImage');
+    Route::post('/detect/history', [DetectionController::class, 'history'])->name('detect.history');
+
 
 
 
