@@ -14,6 +14,8 @@ class Land extends Model
         'unique_land_id',
         'crop_id',
     ];
+
+
     public function landowner(): BelongsTo
     {
         return $this->belongsTo(Landowner::class);
@@ -39,5 +41,9 @@ class Land extends Model
     public function iot()
     {
         return $this->hasOne(Iot::class);
+    }
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
     }
 }
