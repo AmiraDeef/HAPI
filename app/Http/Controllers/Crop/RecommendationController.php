@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Crop;
 use App\Events\LandInformationReceived;
 use App\Http\Controllers\Controller;
 use App\Models\Crop;
+use App\Models\Iot;
 use App\Models\CropLandHistory;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
