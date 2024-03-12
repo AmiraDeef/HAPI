@@ -30,7 +30,7 @@ class RecommendationController extends Controller
 //            $response = Http::post('https://e376e3b7-2a57-4420-9342-3717ad9cec0a.mock.pstmn.io/land-info', [
 //                'land_id' => $land->unique_land_id,
 //            ]);
-            $iot_data = Iot::where('land_id', $land->id)->latest()->first();
+            $iot_data = Iot::where('land_id', $land->unique_land_id)->latest()->first();
 
             if (!$iot_data) {
                 return response()->json(['error' => 'No IoT data found for the specified land'], 404);
