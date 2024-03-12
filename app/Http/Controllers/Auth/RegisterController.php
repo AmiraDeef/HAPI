@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationController;
 use App\Http\Requests\Auth\FarmerRegistrationRequest;
 use App\Http\Requests\Auth\LandownerRegistrationRequest;
 
@@ -56,6 +57,9 @@ class RegisterController extends Controller
         }
         $user = $this->registerUser($request->only(['username', 'phone_number', 'password','role']));
         $this->createFarmer($user,$request->only(['land_id']));
+        //for notification
+        $new_farmer_notify=new NotificationController();
+        $new_farmer_notify->createNewFarmerNotification($request->land_id,$user->username);
 
         $token=$this->generateToken($user);
         $success= [
