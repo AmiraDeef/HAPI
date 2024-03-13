@@ -58,8 +58,8 @@ class RegisterController extends Controller
         $user = $this->registerUser($request->only(['username', 'phone_number', 'password','role']));
         $this->createFarmer($user,$request->only(['land_id']));
         //for notification
-        $new_farmer_notify=new NotificationController();
-        $new_farmer_notify->createNewFarmerNotification($request->land_id,$user->username);
+        $notificationController = new NotificationController();
+        $notificationController->createNewFarmerNotification($request->land_id,$user->username);
 
         $token=$this->generateToken($user);
         $success= [
