@@ -7,6 +7,7 @@ use App\Http\Controllers\Crop\DetectionController;
 use App\Http\Controllers\Crop\RecommendationController;
 use App\Http\Controllers\Crop\SelectingManualController;
 use App\Http\Controllers\IOT\IotDataController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 
 //for guest detection
 
-Route::post('/detect', [DetectionController::class, 'detectImageForGuest'])->name('detectImageForGuest');
+Route::post('/detect', [DetectionController::class, 'detect'])->name('detect');
 
 
 //for iot
@@ -44,7 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/crop/recommendation', [RecommendationController::class, 'recommend']);
 
     //detection
-    Route::post('/detect', [DetectionController::class, 'detectImage'])->name('detectImage');
+   // Route::post('/detect', [DetectionController::class, 'detect'])->name('detect');
     Route::post('/detect/history', [DetectionController::class, 'history'])->name('detect.history');
 
     //for notifications
