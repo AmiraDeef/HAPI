@@ -59,7 +59,10 @@ class NotificationController extends Controller
     }
 
     public function createNewDetectionNotification($land_id,$username){
-        $users = Land::findOrFail($land_id)->users;
+        $land = Land::findOrFail($land_id);
+        $landowner=$land->landowner;
+        $farmers=$land->farmers;
+        $users = $landowner->merge($farmers)->pluck('user');
         foreach ($users as $user) {
             Notification::create([
                 'land_id' => $land_id,
@@ -72,8 +75,11 @@ class NotificationController extends Controller
 
     }
     public function createNewIotNotification($land_id){
-        $landowners = Land::findOrFail($land_id)->landowners;
-        foreach ($landowners as $landowner) {
+        $land = Land::findOrFail($land_id);
+        $landowner=$land->landowner;
+        $farmers=$land->farmers;
+        $users = $landowner->merge($farmers)->pluck('user');
+        foreach ($users as $user) {
             Notification::create([
                 'land_id' => $land_id,
                 'user_id' => $landowner->user->id,
