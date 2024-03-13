@@ -28,7 +28,7 @@ class DetectionController extends Controller
                     if (Auth::check()) {
                         $this->store(Auth::id(), $result, $request->file('image'));
                         $detection_notify= new NotificationController();
-                        $detection_notify->createNewDetectionNotification(Auth::user()->land_id,Auth::user()->username);
+                        $detection_notify->createNewDetectionNotification(Auth::user()->land->unique_land_id,Auth::user()->username);
                     }
                 return response()->json($result);
               } else {

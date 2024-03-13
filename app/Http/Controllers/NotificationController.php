@@ -49,9 +49,6 @@ class NotificationController extends Controller
                 ]);
             }
 
-            // Success message (optional)
-            // return response()->json(['message' => 'Notifications created successfully']);
-
         } catch (ModelNotFoundException $e) {
             // Handle case where land is not found
             return response()->json(['error' => 'Land with ID ' . $land_id . ' not found'], 404);
