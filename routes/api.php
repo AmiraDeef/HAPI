@@ -47,6 +47,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/detect', [DetectionController::class, 'detectImage'])->name('detectImage');
     Route::post('/detect/history', [DetectionController::class, 'history'])->name('detect.history');
 
+    //for notifications
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::put('/notifications/{id}/read', [NotificationController::class, 'seenNotification'])->name('seen');
 
 
 
