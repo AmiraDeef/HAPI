@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('land_id');
             $table->enum('status',['read','unread'])->default('unread');
-            $table->enum('type',['new_farmer','new_iot_actions','new_detection']);
+            $table->enum('type',['new_farmer','new_iot_actions','new_detection','message']);
             $table->string('message');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('land_id')->references('unique_land_id')->on('lands')->onDelete('cascade');
