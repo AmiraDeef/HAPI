@@ -4,6 +4,7 @@ namespace App\Http\Controllers\IOT;
 
 use App\Http\Controllers\Controller;
 use App\Models\Iot;
+use App\Models\Land;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -29,8 +30,8 @@ class IotDataController extends Controller
         return response()->json(['message' => 'Data saved successfully'], 201);
     }
 
-    public function update(Request $request,$land_id){
-        $iot_data = Iot::where('land_id', $land_id)->first();
+    public function update(Request $request,$id){
+        $iot_data = Iot::where('id', $id)->first();
         if (!$iot_data) {
             return response()->json(['error' => 'IoT data not found for the specified land_id'], 404);
         }

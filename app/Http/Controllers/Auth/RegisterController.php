@@ -56,16 +56,16 @@ class RegisterController extends Controller
             return response()->json(data: ['error'=>$request->validator->errors()->messages()], status: 422);
         }
         $user = $this->registerUser($request->only(['username', 'phone_number', 'password','role']));
-        $this->createFarmer($user,$request->only(['land_id']));
+        $this->createFarmer($user, ['land_id' => $land->id]);
         //for notification
         $notificationController = new NotificationController();
-        $notificationController->createNewFarmerNotification($request->land_id,$user->username);
+        $notificationController->createNewFarmerNotification($land->id,$user->username);
 
         $token=$this->generateToken($user);
         $success= [
         'token'=>$token,
             'username'=>$user->username,
-            'land_id'=>$request->land_id
+            'land_id'=>$land->unique_land_id
 
         ];
         return response()->json($success);
@@ -100,7 +100,7 @@ class RegisterController extends Controller
         $success= [
             'token'=>$token,
             'username'=>$user->username,
-            'land_id'=>$landowner->land['unique_land_id']
+            'land_id'=>$land_id
 
         ];
         return response()->json($success);

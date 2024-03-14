@@ -17,12 +17,15 @@ class NotificationController extends Controller
                 ->orderBy('status', 'asc')
                 ->latest()
                 ->get();
-        } elseif ($user->role === 'farmer') {
-            $notifications = Notification::whereIn('type', ['new_farmer', 'new_detection'])
-                ->where('land_id', auth()->land->unique_land_id)
-                ->orderBy('status', 'asc')
-                ->latest()
-                ->get();
+        } elseif ($user->role ==='farmer'&& $user->farmer) {
+           // dd($user->farmer->land->unique_land_id);
+            $land_id = $user->farmer->land->id;
+                $notifications = Notification::whereIn('type', ['new_detection', 'new_iot_actions', 'message'])
+                    ->where('land_id', $land_id)
+                    ->orderBy('status', 'asc')
+                    ->latest()
+                    ->get();
+          // dd($notifications);
         } else {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
@@ -36,7 +39,7 @@ class NotificationController extends Controller
     {
         try {
             // Attempt to find the land with the provided ID
-            $land = Land::where('unique_land_id', $land_id)->with('landowner')->firstOrFail();
+            $land = Land::where('id', $land_id)->with('landowner')->firstOrFail();
             $landowner = $land->landowner;
 
             if ($landowner) {
@@ -47,6 +50,7 @@ class NotificationController extends Controller
                     'type' => 'new_farmer',
                     'status' => 'unread',
                 ]);
+
             }
 
         } catch (ModelNotFoundException $e) {
@@ -56,10 +60,16 @@ class NotificationController extends Controller
     }
 
     public function createNewDetectionNotification($land_id,$username){
-        $land = Land::findOrFail($land_id);
-        $landowner=$land->landowner;
-        $farmers=$land->farmers;
-        $users = $landowner->merge($farmers)->pluck('user');
+        if(!$land_id){
+            return response()->json(['error' => 'Unauthorized to create notification'], 403);
+        }
+        $land = Land::with(['landowner', 'farmers'])->where('unique_land_id', $land_id)->first();
+        if (!$land) {
+            return response()->json(['error' => 'Land not found'], 404);
+        }
+        $landowners = $land->landowner->user;
+        $farmers = $land->farmers->pluck('user');
+        $users = Collection::wrap($landowners)->merge($farmers);
         foreach ($users as $user) {
             Notification::create([
                 'land_id' => $land_id,
@@ -72,14 +82,28 @@ class NotificationController extends Controller
 
     }
     public function createNewIotNotification($land_id){
-        $land = Land::findOrFail($land_id);
-        $landowner=$land->landowner;
-        $farmers=$land->farmers;
-        $users = $landowner->merge($farmers)->pluck('user');
+        $user = Auth::user();
+        //dd($user->land->unique_land_id);
+        if ($user->landowner){
+            $land_id = $user->landowner->lands->first()->unique_land_id;
+        } elseif($user->farmer){
+            $land_id = $user->land->unique_land_id;
+        } else {
+            return response()->json(['error' => 'Unauthorized to create notification'], 403);
+        }
+        $land = Land::with(['landowner', 'farmers'])->where('unique_land_id', $land_id)->first();
+
+        if (!$land) {
+            return response()->json(['error' => 'Land not found'], 404);
+        }
+
+        $landowners = $land->landowner->user;
+        $farmers = $land->farmers->pluck('user');
+        $users = Collection::wrap($landowners)->merge($farmers);
         foreach ($users as $user) {
             Notification::create([
                 'land_id' => $land_id,
-                'user_id' => $landowner->user->id,
+                'user_id' => $user->id,
                 'message' =>'New IoT actions have been recorded',//I'll add the iot data later
                 'type' => 'new_iot_actions',
                 'status' => 'unread',
