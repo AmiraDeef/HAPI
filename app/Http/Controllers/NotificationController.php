@@ -11,10 +11,22 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Class NotificationController
+ * @package App\Http\Controllers
+ *
+ * This class handles all notification-related actions.
+ */
 class NotificationController extends Controller
 {
+    /**
+     * Fetches and returns all notifications for the currently authenticated user.
+     *
+     * @return JsonResponse
+     */
     public function index(): JsonResponse
     {
+        /** @var User $user */
         $user = auth()->user();
         if ($user->role === 'landowner') {
             $notifications = Notification::where('user_id', $user->id)
@@ -22,27 +34,28 @@ class NotificationController extends Controller
                 ->latest()
                 ->get();
         } elseif ($user->role ==='farmer'&& $user->farmer) {
-           // dd($user->farmer->land->unique_land_id);
             $land_id = $user->farmer->land->id;
-                $notifications = Notification::whereIn('type', ['new_detection', 'new_iot_actions', 'message'])
-                    ->where('land_id', $land_id)
-                    ->orderBy('status', 'asc')
-                    ->latest()
-                    ->get();
-          // dd($notifications);
+            $notifications = Notification::whereIn('type', ['new_detection', 'new_iot_actions', 'message'])
+                ->where('land_id', $land_id)
+                ->orderBy('status', 'asc')
+                ->latest()
+                ->get();
         } else {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-//        dd($notifications);
-        return response()->json(['notifications' => $notifications], 200);
-
+        return response()->json(['notifications' => $notifications]);
     }
 
-
+    /**
+     * Creates a new farmer notification.
+     *
+     * @param $land_id
+     * @param $username
+     * @return JsonResponse
+     */
     public function createNewFarmerNotification($land_id, $username)
     {
         try {
-            // Attempt to find the land with the provided ID
             $land = Land::where('id', $land_id)->with('landowner')->firstOrFail();
             $landowner = $land->landowner;
 
@@ -54,16 +67,22 @@ class NotificationController extends Controller
                     'type' => 'new_farmer',
                     'status' => 'unread',
                 ]);
-
             }
 
         } catch (ModelNotFoundException $e) {
-            // Handle case where land is not found
             return response()->json(['error' => 'Land with ID ' . $land_id . ' not found'], 404);
         }
     }
 
-    public function createNewDetectionNotification($land_id,$username){
+    /**
+     * Creates a new detection notification.
+     *
+     * @param $land_id
+     * @param $username
+     * @return JsonResponse
+     */
+    public function createNewDetectionNotification($land_id,$username)
+    {
         if(!$land_id){
             return response()->json(['error' => 'Unauthorized to create notification'], 403);
         }
@@ -83,11 +102,18 @@ class NotificationController extends Controller
                 'status' => 'unread',
             ]);
         }
-
     }
-    public function createNewIotNotification($land_id){
+
+    /**
+     * Creates a new IoT notification.
+     *
+     * @param $land_id
+     * @return JsonResponse
+     */
+    public function createNewIotNotification($land_id)
+    {
+        /** @var User $user */
         $user = Auth::user();
-        //dd($user->land->unique_land_id);
         if ($user->landowner){
             $land_id = $user->landowner->lands->first()->unique_land_id;
         } elseif($user->farmer){
@@ -108,20 +134,27 @@ class NotificationController extends Controller
             Notification::create([
                 'land_id' => $land_id,
                 'user_id' => $user->id,
-                'message' =>'New IoT actions have been recorded',//I'll add the iot data later
+                'message' =>'New IoT actions have been recorded',
                 'type' => 'new_iot_actions',
                 'status' => 'unread',
             ]);
         }
     }
-    public function createMessageNotification(Request $request){
-       $validated_msg = $request->validate([
-           'message' => 'required|string'
-         ]);
-        $message = $validated_msg['message'];
 
+    /**
+     * Creates a new message notification.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function createMessageNotification(Request $request)
+    {
+        $validated_msg = $request->validate([
+            'message' => 'required|string'
+        ]);
+        $message = $validated_msg['message'];
+        /** @var User $user */
         $user = Auth::user();
-        //dd($user->land->unique_land_id);
         if ($user->landowner){
             $land_id = $user->landowner->lands->first()->unique_land_id;
         } elseif($user->farmer){
@@ -151,12 +184,18 @@ class NotificationController extends Controller
         return response()->json(['message' => 'Message sent successfully'], 201);
     }
 
+    /**
+     * Marks a notification as read.
+     *
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     */
     public function seenNotification(Request $request,$id): JsonResponse
     {
         $notification = Notification::findOrFail($id);
         $notification->update(['status' => 'read']);
 
         return response()->json(['message' => 'Notification marked as read.']);
-
     }
 }

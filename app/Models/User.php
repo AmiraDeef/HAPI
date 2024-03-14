@@ -13,10 +13,17 @@ use Laravel\Sanctum\HasApiTokens;
 /**
  * @method static create(array $user)
  * @property mixed $id
+ * @property mixed $landowner
+ * @property mixed $farmer
+ * @property mixed $role
+ * @property mixed $land
+ * @property mixed $username
+ *
  */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+
 
     /**
      * The attributes that are mass assignable.

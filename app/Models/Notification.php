@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @method static findOrFail($id)
+ * @method static create(array $array)
+ * @method static where(string $string, $land_id)
+ * @method static whereIn(string $string, string[] $array)
+ *
  */
 class Notification extends Model
 {
