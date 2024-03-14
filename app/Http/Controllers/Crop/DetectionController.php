@@ -17,6 +17,11 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class DetectionController extends Controller
 {
+    protected $notificationController;
+    public function __construct()
+    {
+        $this->notificationController = new NotificationController();
+    }
 
     public function detect(ImageRequest $request): JsonResponse{
             try {
@@ -25,11 +30,7 @@ class DetectionController extends Controller
 
                 if ($response->successful()) {
                 $result = $response->json();
-                    if (Auth::check()) {
-                        $this->store(Auth::id(), $result, $request->file('image'));
-                        $detection_notify= new NotificationController();
-                        $detection_notify->createNewDetectionNotification(Auth::user()->land->unique_land_id,Auth::user()->username);
-                    }
+                   $this->processDetectionResult($result, $request->file('image')); //pls remember to run storage with-->  php artisan storage:link
                 return response()->json($result);
               } else {
                 return response()->json(['error' => 'Failed to process image.'], $response->status());
@@ -61,41 +62,27 @@ class DetectionController extends Controller
          fclose($imageStream); // Close the file stream
         return $response;
     }
+    protected function processDetectionResult(array $result, UploadedFile $image): void{
+        if(Auth::check()){
+            $land_id = $this->retrieveUserLandId();
+            $this->store(Auth::id(), $result, $image);
+            $this->notificationController->createNewDetectionNotification($land_id, Auth::user()->username);
+        }
+    }
 
 
+    protected function retrieveUserLandId(): ?int
+    {
+        $user = Auth::user();
+        if ($user->landowner) {
+            return $user->landowner->lands->first()->unique_land_id;
+        } elseif ($user->farmer) {
+            return $user->land->unique_land_id;
+        } else {
+            return null;
+        }
+    }
 
-
-
-
-
-       //detection if uesr auth
-
-
-//    public function detectImage(ImageRequest $request): JsonResponse
-//    {
-//        try {
-//            if (!$request->hasFile('image')) {
-//                return response()->json(['error' => 'Image is required.'], 400);
-//            }
-//
-//            $image = $request->file('image');
-//
-//            $response = Http::attach('image', $image)->post("http://127.0.0.1:5000/detect");//url ai
-//
-//
-//            if ($response->successful()) {
-//                $result = $response->json();
-//                if(Auth::check()){
-//                    $this->store(Auth::id(), $result,$image);
-//                }
-//                return response()->json($result);
-//            } else {
-//                return response()->json(['error' => 'Failed to process image.'], $response->status());
-//            }
-//        } catch (RequestException $e) {
-//            return response()->json(['error' => 'Failed to connect to AI service.'], 500);
-//        }
-//    }
 //if result in json ,I should encode it first
 
     public function store($user_id,$result,$image){
