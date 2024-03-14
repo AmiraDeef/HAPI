@@ -55,6 +55,10 @@ class RegisterController extends Controller
         if(!$validated_data){
             return response()->json(data: ['error'=>$request->validator->errors()->messages()], status: 422);
         }
+        $land = Land::where('unique_land_id', $request->land_id)->first();
+        if (!$land) {
+            return response()->json(['error' => 'Land not found'], 404);
+        }
         $user = $this->registerUser($request->only(['username', 'phone_number', 'password','role']));
         $this->createFarmer($user, ['land_id' => $land->id]);
         //for notification
@@ -94,7 +98,9 @@ class RegisterController extends Controller
         $user = $this->registerUser($request->only(['username', 'phone_number', 'password','role']));
         $landowner = $this->createLandowner($user);
         event(new Registered($user));
-
+        $lands = $landowner->lands;
+        $first_land = $lands->first();    //return the first one until I change it
+        $land_id = $first_land->unique_land_id;
 
         $token=$this->generateToken($user);
         $success= [

@@ -32,9 +32,11 @@ class LandownerCreatedListener
     public function handle(Registered $event): void
     {
         $landowner = $event->user->landowner;
-        $landowner->land()->create([
-           'unique_land_id'=> Str::random(8)
-
-       ]);
+        if ($landowner->lands()->count() === 0) {
+            // If no lands associated, create a new land
+            $landowner->lands()->create([
+                'unique_land_id' => Str::random(8)
+            ]);
+        } //i'll add more lands later
     }
 }
