@@ -1,12 +1,16 @@
-<?php /** @noinspection ALL */
+<?php
 
 namespace App\Http\Controllers;
 
 use App\Models\Land;
 use App\Models\Notification;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+
 class NotificationController extends Controller
 {
     public function index(): JsonResponse
@@ -109,6 +113,42 @@ class NotificationController extends Controller
                 'status' => 'unread',
             ]);
         }
+    }
+    public function createMessageNotification(Request $request){
+       $validated_msg = $request->validate([
+           'message' => 'required|string'
+         ]);
+        $message = $validated_msg['message'];
+
+        $user = Auth::user();
+        //dd($user->land->unique_land_id);
+        if ($user->landowner){
+            $land_id = $user->landowner->lands->first()->unique_land_id;
+        } elseif($user->farmer){
+            $land_id = $user->land->unique_land_id;
+        } else {
+            return response()->json(['error' => 'Unauthorized to create notification'], 403);
+        }
+        $land = Land::with(['landowner', 'farmers'])->where('unique_land_id', $land_id)->first();
+
+        if (!$land) {
+            return response()->json(['error' => 'Land not found'], 404);
+        }
+
+        $landowners = $land->landowner->user;
+        $farmers = $land->farmers->pluck('user');
+        $users = Collection::wrap($landowners)->merge($farmers);
+
+        foreach ($users as $user) {
+            Notification::create([
+                'land_id' => $land->id,
+                'user_id' => $user->id,
+                'message' => $message,
+                'type' => 'message',
+                'status' => 'unread',
+            ]);
+        }
+        return response()->json(['message' => 'Message sent successfully'], 201);
     }
 
     public function seenNotification(Request $request,$id): JsonResponse
