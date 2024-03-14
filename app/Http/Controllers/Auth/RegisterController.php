@@ -8,6 +8,7 @@ use App\Http\Requests\Auth\FarmerRegistrationRequest;
 use App\Http\Requests\Auth\LandownerRegistrationRequest;
 
 use App\Models\Farmer;
+use App\Models\Land;
 use App\Models\Landowner;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;

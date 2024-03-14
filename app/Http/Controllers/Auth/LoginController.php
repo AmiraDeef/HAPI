@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    /** @noinspection PhpUndefinedFieldInspection */
+
     public function login(LoginRequest $request): JsonResponse
     {
 // Validate the login request
