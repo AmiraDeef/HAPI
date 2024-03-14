@@ -16,7 +16,8 @@ class Landowner extends Model
     use HasFactory;
     protected $fillable=[
         'user_id',
-        'unique_land_id',
+        //'unique_land_id',
+        'land_id',
     ];
 
     public function farmers(): HasMany
