@@ -32,7 +32,7 @@ class LoginController extends Controller
 
 
             if ($user->role === 'landowner' && $user->landowner) {
-                $responseData['unique_land_id'] = $user->landowner->land->unique_land_id;
+                $responseData['land_id'] = $user->landowner->lands->first()->unique_land_id;
             }
 
             return response()->json($responseData);
