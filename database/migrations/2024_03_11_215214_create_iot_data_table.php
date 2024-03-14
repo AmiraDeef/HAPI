@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('iot_data', function (Blueprint $table) {
             $table->id();
-             $table->string('land_id');
+             $table->unsignedBigInteger('land_id');
              $table->json('data');
-            $table->foreign('land_id')->references('unique_land_id')->on('lands')->onDelete('cascade');
+            $table->foreign('land_id')->references('id')->on('lands')->onDelete('cascade');
             $table->timestamps();
         });
     }
