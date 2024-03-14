@@ -33,7 +33,7 @@ class NotificationController extends Controller
         } else {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
+//        dd($notifications);
         return response()->json(['notifications' => $notifications], 200);
 
     }
