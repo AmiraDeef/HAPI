@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Land extends Model
 {
@@ -34,11 +35,11 @@ class Land extends Model
         return $this->belongsTo(Crop::class);
     }
 
-    public function cropHistory()
+    public function cropHistory(): HasMany
     {
         return $this->hasMany(CropLandHistory::class);
     }
-    public function iot()
+    public function iot(): HasOne
     {
         return $this->hasOne(Iot::class);
     }
