@@ -28,8 +28,8 @@ class Landowner extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function land(): HasOne
+    public function lands(): HasMany
     {
-        return $this->hasOne(Land::class);
+        return $this->hasMany(Land::class);
     }
 }
