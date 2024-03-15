@@ -29,6 +29,7 @@ Route::post('/detect', [DetectionController::class, 'detect'])->name('detect');
 
 //for iot
 Route::post('/iot/land-data', [IotDataController::class, 'store']);
+Route::get('/iot/land-data', [IotDataController::class, 'sendLand']);
 Route::get('/iot/land-data/{land_id}', [IotDataController::class, 'index']);
 Route::put('/iot/land-data/{land_id}', [IotDataController::class, 'update']);
 Route::delete('/iot/land-data/{land_id}', [IotDataController::class, 'destroy']);

@@ -19,6 +19,10 @@ class IotDataController extends Controller
 
         return response()->json(['iot_data' => $iotData], 200);
     }
+    public function sendLand(){
+        $land_id='EFw0Nqn0';
+        return response()->json(['land_id' => $land_id], 200);
+    }
     public function store(Request $request){
         $validated_data = $request->validate([
             'land_id' => [
@@ -52,10 +56,10 @@ class IotDataController extends Controller
         return response()->json(['message' => 'Data updated successfully'], 200);
     }
 
-    public function destroy(Request $request,$land_id){
-        $iot_data = Iot::where('land_id', $land_id)->first();
+    public function destroy(Request $request,$id){
+        $iot_data = Iot::where('id', $id)->first();
         if (!$iot_data) {
-            return response()->json(['error' => 'IoT data not found for the specified land_id'], 404);
+            return response()->json(['error' => 'IoT data not found '], 404);
         }
         $iot_data->delete();
 
