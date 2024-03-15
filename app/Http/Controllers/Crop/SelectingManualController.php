@@ -27,7 +27,7 @@ class SelectingManualController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         //get the land of the landowner
-        $land = Auth::user()->landowner->land;
+        $land = Auth::user()->landowner->lands->first();
         $existing_history = CropLandHistory::where('land_id', $land->id)
             ->orderBy('planted_at', 'desc')
             ->first();

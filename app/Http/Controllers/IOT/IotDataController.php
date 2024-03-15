@@ -11,7 +11,11 @@ use Illuminate\Validation\Rule;
 class IotDataController extends Controller
 {
     public function index($land_id){
-        $iotData = Iot::where('land_id', $land_id)->get();
+        $land=Land::where('unique_land_id',$land_id)->first();
+        if(!$land){
+            return response()->json(['error' => 'Land not found'], 404);
+        }
+        $iotData = Iot::where('land_id', $land->id)->get();
 
         return response()->json(['iot_data' => $iotData], 200);
     }
@@ -24,6 +28,11 @@ class IotDataController extends Controller
             ],
             'data' => 'required|json',
         ]);
+        $land=Land::where('unique_land_id',$validated_data['land_id'])->first();
+        if(!$land){
+            return response()->json(['error' => 'Land not found'], 404);
+        }
+        $validated_data['land_id']=$land->id;
         $iot_data=new Iot();
         $iot_data->fill($validated_data);
         $iot_data->save();
