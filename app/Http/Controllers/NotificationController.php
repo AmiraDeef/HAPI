@@ -68,10 +68,11 @@ class NotificationController extends Controller
                     'status' => 'unread',
                 ]);
             }
+            return response()->json(['message' => 'Notification created successfully'], 201);
 
-        } catch (ModelNotFoundException $e) {
+          } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Land with ID ' . $land_id . ' not found'], 404);
-        }
+            }
     }
 
     /**
