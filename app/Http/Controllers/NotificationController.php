@@ -53,7 +53,7 @@ class NotificationController extends Controller
      * @param $username
      * @return JsonResponse
      */
-    public function createNewFarmerNotification($land_id, $username)
+    public function createNewFarmerNotification($land_id, $username): JsonResponse
     {
         try {
             $land = Land::where('id', $land_id)->with('landowner')->firstOrFail();
