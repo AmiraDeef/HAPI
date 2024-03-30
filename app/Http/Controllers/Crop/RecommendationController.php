@@ -68,7 +68,7 @@ class RecommendationController extends Controller
     private function getCropRecommendation($landInfo)
     {
 //get the crop recommendation
-        $response = Http::post("https://e376e3b7-2a57-4420-9342-3717ad9cec0a.mock.pstmn.io/recommend-crop", $landInfo); //url ai
+        $response = Http::post("http://127.0.0.1:5000/get-crop-recommendation", $landInfo); //url ai
         if (!$response->successful()) {
             return response()->json(['error' => 'Failed to get crop recommendation.'], $response->status());
         }
