@@ -44,19 +44,6 @@ class RecommendationController extends Controller
                 'crop_recommendations' => $cropRecommendations,
             ], 200);
 
-//            }else {
-                //just for test ,I'll refactor it later..
-//                switch ($response->status()) {
-//                    case 400:
-//                        return response()->json(['error' => 'Bad request'], 400);
-//                    case 404:
-//                        return response()->json(['error' => 'Land information not found'], 404);
-//                    case 500:
-//                        return response()->json(['error' => 'Server error'], 500);
-//                    default:
-//                        return response()->json(['error' => 'Failed to get land information'], $response->status());
-//                }
-//            }
         } catch (\Exception $e) {
             Log::error('Error processing HTTP request: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
