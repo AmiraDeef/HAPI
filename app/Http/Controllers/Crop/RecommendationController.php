@@ -54,8 +54,18 @@ class RecommendationController extends Controller
 
     private function getCropRecommendation($landInfo)
     {
-//get the crop recommendation
-        $response = Http::post("http://127.0.0.1:5000/get-crop-recommendation", $landInfo); //url ai
+        // Convert JSON string to associative array
+        $data = json_decode($landInfo, true);
+
+        // Check if decoding was successful
+        if ($data === null) {
+            return response()->json(['error' => 'Invalid land information format.'], 400);
+        }
+
+        // Make HTTP POST request to the Flask API endpoint
+        $response = Http::post("http://127.0.0.1:5000/get-crop-recommendation", $data);
+
+        // Check if the request was successful
         if (!$response->successful()) {
             return response()->json(['error' => 'Failed to get crop recommendation.'], $response->status());
         }
