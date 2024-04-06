@@ -28,12 +28,12 @@ class SelectingManualController extends Controller
         }
         //get the land of the landowner
         $land = Auth::user()->landowner->lands->first();
-        $existing_history = CropLandHistory::where('land_id', $land->id)
-            ->orderBy('planted_at', 'desc')
-            ->first();
-        if ($existing_history) {
-            return response()->json(['message' => 'Duplicate request received. Please try again later.'], 429);
-        }
+//        $existing_history = CropLandHistory::where('land_id', $land->id)
+//            ->orderBy('planted_at', 'desc')
+//            ->first();
+//        if ($existing_history) {
+//            return response()->json(['message' => 'Duplicate request received. Please try again later.'], 429);
+//        }
         $crop = Crop::findOrCreate(['name' => $request->input('crop')]);
 
         CropLandHistory::create([
