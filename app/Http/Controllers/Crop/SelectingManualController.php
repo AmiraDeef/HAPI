@@ -45,31 +45,31 @@ class SelectingManualController extends Controller
         $land->save();
 
         // Send the chosen crop and land ID via http request
-            try {
-                $response = Http::post('https://your-iot-api.com/selected-crop', [
-                    'land_id' => $land->unique_land_id,
-                    'crop' => $crop->name,
-                ]);
-                if ($response->successful()) {
-                    Log::error('Error sending crop selection data to IoT API:', ['response' => $response]);
-                } else {
-                    //just for test ,I'll refactor it later..
-                    switch ($response->status()) {
-                        case 400:
-                            return response()->json(['error' => 'Bad request'], 400);
-                        case 404:
-                            return response()->json(['error' => 'crop information not found'], 404);
-                        case 500:
-                            return response()->json(['error' => 'Server error'], 500);
-                        default:
-                            return response()->json(['error' => 'Failed to send choosen crop information'], $response->status());
-                    }
-                }
-            } catch (\Exception $e) {
-                Log::error('Error processing HTTP request: ' . $e->getMessage());
-                Log::error($e->getTraceAsString());
-                return response()->json(['error' => 'Failed to process HTTP request'], 500);
-            }
+//            try {
+//                $response = Http::post('https://your-iot-api.com/selected-crop', [
+//                    'land_id' => $land->unique_land_id,
+//                    'crop' => $crop->name,
+//                ]);
+//                if ($response->successful()) {
+//                    Log::error('Error sending crop selection data to IoT API:', ['response' => $response]);
+//                } else {
+//                    //just for test ,I'll refactor it later..
+//                    switch ($response->status()) {
+//                        case 400:
+//                            return response()->json(['error' => 'Bad request'], 400);
+//                        case 404:
+//                            return response()->json(['error' => 'crop information not found'], 404);
+//                        case 500:
+//                            return response()->json(['error' => 'Server error'], 500);
+//                        default:
+//                            return response()->json(['error' => 'Failed to send choosen crop information'], $response->status());
+//                    }
+//                }
+//            } catch (\Exception $e) {
+//                Log::error('Error processing HTTP request: ' . $e->getMessage());
+//                Log::error($e->getTraceAsString());
+//                return response()->json(['error' => 'Failed to process HTTP request'], 500);
+//            }
 
             return response()->json(['message' => "the chosen crop is " . $crop->name], 200);
 
