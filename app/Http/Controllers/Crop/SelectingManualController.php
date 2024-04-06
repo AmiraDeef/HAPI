@@ -70,11 +70,11 @@ class SelectingManualController extends Controller
 //                Log::error($e->getTraceAsString());
 //                return response()->json(['error' => 'Failed to process HTTP request'], 500);
 //            }
+//            return response()->json(status: 200);
+        return response()->json()->setStatusCode(200);
 
-            return response()->json(['message' => "the chosen crop is " . $crop->name], 200);
-
-
-        }
+        
+    }
 
 }
 
