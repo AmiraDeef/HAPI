@@ -98,12 +98,29 @@ class DetectionController extends Controller
 
     public function history(): JsonResponse
     {
-//        // history of user->farmer detection
-//        $detection_history = Detection::where('user_id', Auth::id())->get();
-//
-        // history of user->landowner but specific land detection
-         $detection_history=Detection::where('land_id',Auth::user()->land_id)->get();
-         return response()->json($detection_history, 200);
+         $detection_history=Detection::where('land_id',$this->retrieveUserLandId())->get();
+        $enhancedHistory = $detection_history->map(function ($detection) {
+            $detection->detection = json_decode($detection->detection);
+            $img_name = basename($detection->image);
+            $imageUrl = Storage::url("detections/{$img_name}"); // Use Storage facade
+            $detection->image_url = $imageUrl;
+            $timestamp = strtotime($detection->detected_at);
+            $date = date('d/m/Y', $timestamp);
+            $time = date('H:i:s', $timestamp);
+
+            // Create an array with the required data
+            $result = [
+                'username' => Auth::user()->username, // Assuming you want the currently logged-in user's username
+                'image_url' => $imageUrl,
+                'detection' => $detection->detection,
+                'date' => $date,
+                'time' => $time
+            ];
+
+            return $result;
+        });
+
+         return response()->json($enhancedHistory);
 
     }
 
