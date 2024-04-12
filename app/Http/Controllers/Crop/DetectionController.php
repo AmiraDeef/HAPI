@@ -75,9 +75,9 @@ class DetectionController extends Controller
     {
         $user = Auth::user();
         if ($user->landowner) {
-            return $user->landowner->lands->first()->unique_land_id;
+            return $user->landowner->lands->first()->id;
         } elseif ($user->farmer) {
-            return $user->land->unique_land_id;
+            return $user->land->id;
         } else {
             return null;
         }
