@@ -89,6 +89,7 @@ class DetectionController extends Controller
         $path = Storage::putFile('detections', $image);
         $detection = new Detection();
         $detection->user_id = $user_id;
+        $detection->land_id = $this->retrieveUserLandId();
         $detection->image = $path;
         $detection->detection = json_encode($result);
         $detection->detected_at = now();
