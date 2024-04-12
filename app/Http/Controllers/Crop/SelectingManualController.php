@@ -73,7 +73,7 @@ class SelectingManualController extends Controller
 //            return response()->json(status: 200);
         return response()->json()->setStatusCode(200);
 
-        
+
     }
 
 }
