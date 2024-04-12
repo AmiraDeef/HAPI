@@ -9,7 +9,9 @@ use App\Http\Controllers\Crop\SelectingManualController;
 use App\Http\Controllers\IOT\IotDataController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +50,26 @@ Route::middleware('auth:sanctum')->group(function () {
     //detection
    // Route::post('/detect', [DetectionController::class, 'detect'])->name('detect');
     Route::post('/detect/history', [DetectionController::class, 'history'])->name('detect.history');
+
+//    Route::get('/get-image/{filename}', function ($filename) {
+//        $path = storage_path("app/public/detections/" . $filename);
+//
+//        if (!Storage::exists($path)) {
+//            abort(404);
+//        }
+//
+//        try {
+//            $image = Storage::get($path);
+//            $mime = Storage::mimeType($path);
+//            return response($image, 200, ['Content-Type' => $mime]);
+//        } catch (Exception $e) {
+//            Log::error("Failed to retrieve image: " . $e->getMessage());
+//            abort(500);
+//        }
+//
+//    })->name('get-image');
+
+
 
     //for notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
