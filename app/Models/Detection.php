@@ -10,7 +10,7 @@ class Detection extends Model
 {
     use HasFactory;
     protected $fillable=[
-        'user_id','land_id','image','detection','detected_at'
+        'user_id','land_id','crop','image','detection','detected_at'
     ];
     public $timestamps = false;
 
