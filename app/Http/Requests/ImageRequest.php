@@ -22,6 +22,7 @@ class ImageRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'crop' => 'required|string',
             'image' =>'mimes:jpeg,png,jpg|required|max:10000',//10MB
         ];
     }
