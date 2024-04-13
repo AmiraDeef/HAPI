@@ -26,6 +26,10 @@ class DetectionController extends Controller
     public function detect(ImageRequest $request): JsonResponse{
             try {
                 $this->validateImage($request);
+                $validatedData = $request->validated();
+                //validate crop
+                $validatedCrop = $validatedData['crop']; //remember to add to DB later
+                //$this->validateImage($validatedData['image']);
                 $response = $this->sendImgToAI($request->file('image'));
 
                 if ($response->successful()) {
@@ -92,6 +96,7 @@ class DetectionController extends Controller
         $detection->land_id = $this->retrieveUserLandId();
         $detection->image = $path;
         $detection->detection = json_encode($result);
+        $detection->detection->crop = $crop;
         $detection->detected_at = now();
         $detection->save();
 
