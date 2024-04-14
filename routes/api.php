@@ -46,39 +46,12 @@ Route::middleware('auth:sanctum')->group(function () {
     //crop setup
     Route::post('/crop/selecting-manual', [SelectingManualController::class, 'selectionManually']);
     Route::post('/crop/recommendation', [RecommendationController::class, 'recommend']);
-
     //detection
-   // Route::post('/detect', [DetectionController::class, 'detect'])->name('detect');
     Route::post('/detect/history', [DetectionController::class, 'history'])->name('detect.history');
-
-//    Route::get('/get-image/{filename}', function ($filename) {
-//        $path = storage_path("app/public/detections/" . $filename);
-//
-//        if (!Storage::exists($path)) {
-//            abort(404);
-//        }
-//
-//        try {
-//            $image = Storage::get($path);
-//            $mime = Storage::mimeType($path);
-//            return response($image, 200, ['Content-Type' => $mime]);
-//        } catch (Exception $e) {
-//            Log::error("Failed to retrieve image: " . $e->getMessage());
-//            abort(500);
-//        }
-//
-//    })->name('get-image');
-
-
-
     //for notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::put('/notifications/{id}/read', [NotificationController::class, 'seenNotification'])->name('seen');
     Route::post('/notifications/messages', [NotificationController::class, 'createMessageNotification'])->name('message');
-
-
-
-
     //profile
     Route::post('/profile/password', [ProfileController::class, 'changePassword']);
     Route::delete('/profile', [ProfileController::class, 'deleteAccount']);
