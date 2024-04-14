@@ -46,10 +46,6 @@ class DetectionController extends Controller
     {
         $validatedData = $request->validated();
 
-        if (!$validatedData) {
-            return response()->json(['error' => $request->validator->errors()->messages()], 422);
-        }
-
         if (!$request->hasFile('image')) {
             return response()->json(['error' => 'Image is required.'], 400);
         }
