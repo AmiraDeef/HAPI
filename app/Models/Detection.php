@@ -17,13 +17,12 @@ class Detection extends Model
   public function user(): BelongsTo
   {
         return $this->belongsTo(User::class);
-    }
+  }
 
-
-    public function land(): BelongsTo
-    {
+  public function land(): BelongsTo
+  {
         return $this->belongsTo(Land::class);
-    }
+  }
 
 
 }
