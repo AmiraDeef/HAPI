@@ -66,18 +66,20 @@ class DetectionController extends Controller
          fclose($imageStream); // Close the file stream
         return $response;
     }
-    protected function processDetectionResult(array $result, UploadedFile $image): void{
-        if(Auth::check()){
+    protected function processDetectionResult(array $result, UploadedFile $image,string $validatedCrop): void{
+        $user = Auth::guard('api')->user();
+        if($user){
             $land_id = $this->retrieveUserLandId();
-            $this->store(Auth::id(), $result, $image);
-            $this->notificationController->createNewDetectionNotification($land_id, Auth::user()->username);
+            $this->store($user->id, $result, $image,$validatedCrop);
+
+            $this->notificationController->createNewDetectionNotification($land_id, $user->username);
         }
     }
 
 
     protected function retrieveUserLandId(): ?int
     {
-        $user = Auth::user();
+        $user = Auth::guard('api')->user();
         if ($user->landowner) {
             return $user->landowner->lands->first()->id;
         } elseif ($user->farmer) {
