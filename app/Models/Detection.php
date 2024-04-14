@@ -23,6 +23,10 @@ class Detection extends Model
   {
         return $this->belongsTo(Land::class);
   }
+    public function crop()
+    {
+        return $this->belongsTo(Crop::class);
+    }
 
 
 }

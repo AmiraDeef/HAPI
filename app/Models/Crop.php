@@ -36,4 +36,8 @@ class Crop extends Model
     {
         return $this->hasMany(CropLandHistory::class);
     }
+    public function detections()
+    {
+        return $this->hasMany(Detection::class);
+    }
 }
