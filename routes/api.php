@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Storage;
 
 //for guest detection
 
-Route::post('/detect', [DetectionController::class, 'detect'])->name('detect');
+Route::post('/detect', [DetectionController::class, 'detect'])->middleware('auth_optional:api')->name('detect');
 
 
 //for iot
