@@ -31,13 +31,12 @@ class DetectionController extends Controller
                 $validatedCrop = $validatedData['crop']; //remember to add to DB later
                 //$this->validateImage($validatedData['image']);
                 $response = $this->sendImgToAI($request->file('image'));
-
-                if ($response->successful()) {
-                $result = $response->json();
-                   $this->processDetectionResult($result, $request->file('image')); //pls remember to run storage with-->  php artisan storage:link
-                return response()->json($result);
-              } else {
-                return response()->json(['error' => 'Failed to process image.'], $response->status());
+//                if ($response->successful()) {
+                if ($response) {
+                    $this->processDetectionResult($response, $request->file('image'), $validatedCrop);
+                    return response()->json($response);
+                } else {
+                    return response()->json(['error' => 'Failed to process image.'], 500);
               }
             } catch (RequestException $e) {
             return response()->json(['error' => 'Failed to connect to AI service.'], 500);
@@ -61,10 +60,26 @@ class DetectionController extends Controller
     {
         $imageStream = fopen($image->getRealPath(), 'rb');// Open the file in binary mode
 
-        $response = Http::attach('image', $image)->post("http://127.0.0.1:5000/detect");//url ai
-
-         fclose($imageStream); // Close the file stream
-        return $response;
+        //$response = Http::attach('image', $image)->post("http://127.0.0.1:5000/detect");//url ai
+        $responseContent = [
+            "isHealthy" => false,
+            "confidence" => 0.75,
+            "diseases" => [
+                [
+                    "name" => "Corn Rust",
+                    "confidence" => 0.8,
+                    "infoLink" => "https://en.wikipedia.org/wiki/Corn_rust",
+                ],
+                [
+                    "name" => "Leaf Blight",
+                    "confidence" => 0.65,
+                    "infoLink" => "https://en.wikipedia.org/wiki/Leaf_blight",
+                ],
+            ],
+            //'Image' => Storage::url("detections/{basename($detection->image)}"),
+        ];
+        fclose($imageStream); // Close the file stream
+        return $responseContent;
     }
     protected function processDetectionResult(array $result, UploadedFile $image,string $validatedCrop): void{
         $user = Auth::guard('api')->user();
@@ -83,7 +98,7 @@ class DetectionController extends Controller
         if ($user->landowner) {
             return $user->landowner->lands->first()->id;
         } elseif ($user->farmer) {
-            return $user->land->id;
+            return $user->farmer->land->id;
         } else {
             return null;
         }
