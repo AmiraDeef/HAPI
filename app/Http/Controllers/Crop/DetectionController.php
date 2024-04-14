@@ -52,7 +52,7 @@ class DetectionController extends Controller
         return null;
     }
 
-    private function sendImgToAI(UploadedFile $image): Response
+    private function sendImgToAI(UploadedFile $image)
     {
         $imageStream = fopen($image->getRealPath(), 'rb');// Open the file in binary mode
 
@@ -86,8 +86,6 @@ class DetectionController extends Controller
             $this->notificationController->createNewDetectionNotification($land_id, $user->username);
         }
     }
-
-
     protected function retrieveUserLandId(): ?int
     {
         $user = Auth::guard('api')->user();
@@ -100,19 +98,17 @@ class DetectionController extends Controller
         }
     }
 
-//if result in json ,I should encode it first
-
-    public function store($user_id,$result,$image){
-        $path = Storage::putFile('detections', $image);
+    public function store($user_id,$result,$image,$crop){
+//        $path = Storage::putFile('public/detections', $image);
+        $path = $image->storeAs('detections', $image->getClientOriginalName(),'public');
         $detection = new Detection();
         $detection->user_id = $user_id;
         $detection->land_id = $this->retrieveUserLandId();
         $detection->image = $path;
         $detection->detection = json_encode($result);
-        $detection->detection->crop = $crop;
+        //$detection->detection['crop'] = $crop;
         $detection->detected_at = now();
         $detection->save();
-
     }
 
     public function history(): JsonResponse
@@ -126,21 +122,17 @@ class DetectionController extends Controller
             $timestamp = strtotime($detection->detected_at);
             $date = date('d/m/Y', $timestamp);
             $time = date('H:i:s', $timestamp);
-
             // Create an array with the required data
             $result = [
-                'username' => Auth::user()->username, // Assuming you want the currently logged-in user's username
+                'username' => $detection->user->username, // Assuming you want the currently logged-in user's username
                 'image_url' => $imageUrl,
                 'detection' => $detection->detection,
                 'date' => $date,
                 'time' => $time
             ];
-
             return $result;
         });
-
          return response()->json($enhancedHistory);
-
     }
 
 
