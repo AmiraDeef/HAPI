@@ -19,10 +19,10 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class DetectionController extends Controller
 {
-    protected $notificationController;
-    public function __construct()
+    protected NotificationController $notificationController;
+    public function __construct(NotificationController $notificationController)
     {
-        $this->notificationController = new NotificationController();
+        $this->notificationController = $notificationController;
     }
 
     public function detect(ImageRequest $request): JsonResponse{
