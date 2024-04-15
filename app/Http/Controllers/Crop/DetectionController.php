@@ -8,11 +8,9 @@ use App\Http\Requests\ImageRequest;
 use App\Models\Crop;
 use App\Models\Detection;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Client\Response;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
+
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -162,6 +160,8 @@ class DetectionController extends Controller
         }
 
         $enhancedDetection = $this->enhanceDetections(collect([$detection]))->first();
+        $cropName = $detection->crop->name;
+        $enhancedDetection['crop'] = $cropName;
         $enhancedDetection['detection'] = $detection->detection;
 
         return response()->json($enhancedDetection);
