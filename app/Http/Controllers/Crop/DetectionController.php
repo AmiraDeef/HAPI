@@ -92,12 +92,15 @@ class DetectionController extends Controller
     public function retrieveUserLandId(): ?int
     {
         $user = Auth::guard('api')->user();
-        if ($user->landowner) {
-            return $user->landowner->lands->first()->id;
-        } elseif ($user->farmer) {
-            return $user->farmer->land->id;
-        } else {
+        //dd($user);
+        if (!$user) {
             return null;
+        }else{
+            if ($user->role === 'landowner') {
+                return $user->landowner->lands()->first()->id;
+            } else{
+                return $user->farmer->land_id;
+            }
         }
     }
 
@@ -116,7 +119,13 @@ class DetectionController extends Controller
 
     public function history(): JsonResponse
     {
-         $detection_history=Detection::where('land_id',$this->retrieveUserLandId())->get();
+        //dd($this->retrieveUserLandId());
+         $detection_history=Detection::where('land_id',$this->retrieveUserLandId())->orderBy('detected_at', 'desc')->get();
+         //dd($detection_history);
+        if($detection_history->isEmpty()) {
+            return response()->json(['error' => 'No detection history found'], 404);
+        }
+
         $enhancedHistory = $detection_history->map(function ($detection) {
             $detection->detection = json_decode($detection->detection);
             $img_name = basename($detection->image);
