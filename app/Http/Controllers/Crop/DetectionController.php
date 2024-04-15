@@ -106,7 +106,7 @@ class DetectionController extends Controller
     }
 
     public function store($user_id,$result,$image,$crop_id){
-//        $path = Storage::putFile('public/detections', $image);
+
         $path = $image->storeAs('detections', $image->getClientOriginalName(),'public');
         $detection = new Detection();
         $detection->user_id = $user_id;
@@ -117,27 +117,19 @@ class DetectionController extends Controller
         $detection->detected_at = now();
         $detection->save();
     }
-
-    public function history(): JsonResponse
+    private function enhanceDetections($detections)
     {
-        //dd($this->retrieveUserLandId());
-         $detection_history=Detection::where('land_id',$this->retrieveUserLandId())->orderBy('detected_at', 'desc')->get();
-         //dd($detection_history);
-        if($detection_history->isEmpty()) {
-            return response()->json(['error' => 'No detection history found'], 404);
-        }
-
-        $enhancedHistory = $detection_history->map(function ($detection) {
+        return $detections->map(function ($detection) {
             $detection->detection = json_decode($detection->detection);
             $img_name = basename($detection->image);
-            $imageUrl = Storage::url("detections/{$img_name}"); // Use Storage facade
+            $imageUrl = Storage::url("detections/{$img_name}");
             $detection->image_url = $imageUrl;
             $timestamp = strtotime($detection->detected_at);
             $date = date('d/m/Y', $timestamp);
-            $time = date('H:i', $timestamp);
+            $time = date('H:i A', $timestamp);
             // Create an array with the required data
             $result = [
-                'id'=>$detection->id,
+                'id' => $detection->id,
                 'username' => $detection->user->username,
                 'image_url' => $imageUrl,
                 'date' => $date,
@@ -145,7 +137,18 @@ class DetectionController extends Controller
             ];
             return $result;
         });
-         return response()->json($enhancedHistory);
+    }
+
+
+    public function history(): JsonResponse
+    {
+        $detection_history = Detection::where('land_id', $this->retrieveUserLandId())->orderBy('detected_at', 'desc')->get();
+        if ($detection_history->isEmpty()) {
+            return response()->json(['error' => 'No detection history found'], 404);
+        }
+
+        $enhancedHistory = $this->enhanceDetections($detection_history);
+        return response()->json($enhancedHistory);
     }
     public function show($id){
         $detection = Detection::find($id);
@@ -157,92 +160,33 @@ class DetectionController extends Controller
         if (!$user || ($user->id !== $detection->user_id && $detection->land_id !== $this->retrieveUserLandId())) {
             return response()->json(['error' => 'Unauthorized to view this detection'], 403);
         }
-        $detection->detection = json_decode($detection->detection);
-        $img_name = basename($detection->image);
-        $imageUrl = Storage::url("detections/{$img_name}");
-        $detection->image_url = $imageUrl;
 
-        $cropName = '';
+        $enhancedDetection = $this->enhanceDetections(collect([$detection]))->first();
+        $enhancedDetection['detection'] = $detection->detection;
 
-        if ($detection->crop_id) {
-            $crop = Crop::find($detection->crop_id);
-            if ($crop) {
-                $cropName = $crop->name;
-            } else {
-                $cropName = 'Unknown Crop';
-            }
-        }
-        $timestamp = strtotime($detection->detected_at);
-        $date = date('d/m/Y', $timestamp);
-        $time = date('H:i', $timestamp);
-        // Create an array with the required data
-        $result = [
-            'id'=>$detection->id,
-            'username' => $detection->user->username,
-            'crop'=>$cropName,
-            'image_url' => $imageUrl,
-            'detection' => $detection->detection,
-            'date' => $date,
-            'time' => $time
-        ];
-        return response()->json($result);
+        return response()->json($enhancedDetection);
     }
     //fun return last detection
     public function lastOneDetection(): JsonResponse{
 
-        $landId = $this->retrieveUserLandId();
-       // dd($landId);
+        $detections = Detection::where('land_id', $this->retrieveUserLandId())->latest('detected_at')->limit(1)->get();
+        $enhancedDetections = $this->enhanceDetections($detections);
 
-        $detection=Detection::where('land_id',$this->retrieveUserLandId())->latest('detected_at')->first();
-        if(!$detection){
+        if ($enhancedDetections->isEmpty()) {
             return response()->json(['error' => 'Detection not found'], 404);
         }
-        $user = Auth::guard('api')->user();
-        if (!$user || ($user->id !== $detection->user_id && $detection->land_id !== $this->retrieveUserLandId())) {
-            return response()->json(['error' => 'Unauthorized to view this detection'], 403);
-        }
-        $img_name = basename($detection->image);
-        $imageUrl = Storage::url("detections/{$img_name}"); // Use Storage facade
-        $detection->image_url = $imageUrl;
-        $timestamp = strtotime($detection->detected_at);
-        $date = date('d/m/Y', $timestamp);
-        $time = date('H:i', $timestamp);
-        // Create an array with the required data
-        $result = [
-            'id'=>$detection->id,
-            'username' => $detection->user->username,
-            'image_url' => $imageUrl,
-            'date' => $date,
-            'time' => $time
-        ];
-        return response()->json($result);
+
+        return response()->json($enhancedDetections->first());
     }
     //return last 5 detection
     public function lastFiveDetection(): JsonResponse{
-        $landId = $this->retrieveUserLandId();
+
         $detections=Detection::where('land_id',$this->retrieveUserLandId())->latest('detected_at')->limit(5)->get();
         if($detections->isEmpty()){
             return response()->json(['error' => 'No detection found'], 404);
         }
-        $enhancedDetections = $detections->map(function ($detection) {
-            $detection->detection = json_decode($detection->detection);
-            $img_name = basename($detection->image);
-            $imageUrl = Storage::url("detections/{$img_name}"); // Use Storage facade
-            $detection->image_url = $imageUrl;
-            $timestamp = strtotime($detection->detected_at);
-            $date = date('d/m/Y', $timestamp);
-            $time = date('H:i', $timestamp);
-            // Create an array with the required data
-            $result = [
-                'id'=>$detection->id,
-                'username' => $detection->user->username,
-                'image_url' => $imageUrl,
-                'date' => $date,
-                'time' => $time
-            ];
-            return $result;
-        });
-        return response()->json($enhancedDetections);
+        $enhancedHistory = $this->enhanceDetections($detections);
+        return response()->json($enhancedHistory);
     }
 
 
