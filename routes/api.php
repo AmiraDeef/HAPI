@@ -25,10 +25,6 @@ use Illuminate\Support\Facades\Storage;
 */
 
 
-Route::get('/detections/history', [DetectionController::class, 'history'])->name('detect.history');
-Route::get('/detections/last', [DetectionController::class, 'lastOneDetection'])->name('detect.last');
-Route::get('/detections/lastFive', [DetectionController::class, 'lastFiveDetection'])->name('detect.lastFive');
-
 //for iot
 Route::post('/iot/land-data', [IotDataController::class, 'store']);
 Route::get('/iot/land-data', [IotDataController::class, 'sendLand']);
@@ -46,7 +42,11 @@ Route::middleware('auth:sanctum')->group(function () {
     //crop setup
     Route::post('/crop/selecting-manual', [SelectingManualController::class, 'selectionManually']);
     Route::post('/crop/recommendation', [RecommendationController::class, 'recommend']);
+
     //detection
+    Route::get('/detections/latest', [DetectionController::class, 'lastOneDetection'])->name('detect.last');
+    Route::get('/detections/latest-five', [DetectionController::class, 'lastFiveDetection'])->name('detect.lastFive');
+    Route::get('/detections', [DetectionController::class, 'history'])->name('detect.history');
     Route::get('/detections/{id}', [DetectionController::class, 'show'])->name('detect.show');
 
     //for notifications
@@ -65,5 +65,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
 //for guest detection
 
-Route::post('/detect', [DetectionController::class, 'detect'])->middleware('auth_optional:api')->name('detect');
+Route::post('/detect', [DetectionController::class, 'detect'])->middleware('auth_optional:sanctum')->name('detect');
 
