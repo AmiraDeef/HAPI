@@ -37,7 +37,7 @@ class DetectionController extends Controller
                 $response = $this->sendImgToAI($request->file('image'));
 //                if ($response->successful()) {
                 if ($response) {
-                    $this->processDetectionResult($response, $request->file('image'), $validatedCrop);
+                    $this->processDetectionResult($response, $request->file('image'), $crop_id);
                     return response()->json($response);
                 } else {
                     return response()->json(['error' => 'Failed to process image.'], 500);
@@ -81,16 +81,15 @@ class DetectionController extends Controller
         fclose($imageStream); // Close the file stream
         return $responseContent;
     }
-    protected function processDetectionResult(array $result, UploadedFile $image,string $validatedCrop): void{
+    public function processDetectionResult(array $result, UploadedFile $image,int $cropId): void{
         $user = Auth::guard('api')->user();
         if($user){
-            $land_id = $this->retrieveUserLandId();
-            $this->store($user->id, $result, $image,$validatedCrop);
-
-            $this->notificationController->createNewDetectionNotification($land_id, $user->username);
+            $landId = $this->retrieveUserLandId();
+            $this->store($user->id, $result, $image,$cropId);
+            $this->notificationController->createNewDetectionNotification($landId, $user->username);
         }
     }
-    protected function retrieveUserLandId(): ?int
+    public function retrieveUserLandId(): ?int
     {
         $user = Auth::guard('api')->user();
         if ($user->landowner) {
@@ -102,7 +101,7 @@ class DetectionController extends Controller
         }
     }
 
-    public function store($user_id,$result,$image,$crop){
+    public function store($user_id,$result,$image,$crop_id){
 //        $path = Storage::putFile('public/detections', $image);
         $path = $image->storeAs('detections', $image->getClientOriginalName(),'public');
         $detection = new Detection();
@@ -110,7 +109,7 @@ class DetectionController extends Controller
         $detection->land_id = $this->retrieveUserLandId();
         $detection->image = $path;
         $detection->detection = json_encode($result);
-        //$detection->detection['crop'] = $crop;
+        $detection->crop_id = $crop_id;
         $detection->detected_at = now();
         $detection->save();
     }
