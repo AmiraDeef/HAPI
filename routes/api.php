@@ -24,10 +24,10 @@ use Illuminate\Support\Facades\Storage;
 |
 */
 
-//for guest detection
 
-Route::post('/detect', [DetectionController::class, 'detect'])->middleware('auth_optional:api')->name('detect');
-
+Route::get('/detections/history', [DetectionController::class, 'history'])->name('detect.history');
+Route::get('/detections/last', [DetectionController::class, 'lastOneDetection'])->name('detect.last');
+Route::get('/detections/lastFive', [DetectionController::class, 'lastFiveDetection'])->name('detect.lastFive');
 
 //for iot
 Route::post('/iot/land-data', [IotDataController::class, 'store']);
@@ -47,7 +47,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/crop/selecting-manual', [SelectingManualController::class, 'selectionManually']);
     Route::post('/crop/recommendation', [RecommendationController::class, 'recommend']);
     //detection
-    Route::post('/detect/history', [DetectionController::class, 'history'])->name('detect.history');
+    Route::get('/detections/{id}', [DetectionController::class, 'show'])->name('detect.show');
+
     //for notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::put('/notifications/{id}/read', [NotificationController::class, 'seenNotification'])->name('seen');
@@ -61,3 +62,8 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 });
+
+//for guest detection
+
+Route::post('/detect', [DetectionController::class, 'detect'])->middleware('auth_optional:api')->name('detect');
+
