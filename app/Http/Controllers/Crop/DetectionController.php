@@ -82,7 +82,8 @@ class DetectionController extends Controller
         return $responseContent;
     }
     public function processDetectionResult(array $result, UploadedFile $image,int $cropId): void{
-        $user = Auth::guard('api')->user();
+        $user = Auth::guard('sanctum')->user();
+        //dd($user);
         if($user){
             $landId = $this->retrieveUserLandId();
             $this->store($user->id, $result, $image,$cropId);
@@ -91,8 +92,8 @@ class DetectionController extends Controller
     }
     public function retrieveUserLandId(): ?int
     {
-        $user = Auth::guard('api')->user();
-        //dd($user);
+        $user = Auth::guard('sanctum')->user();
+//        ($user);
         if (!$user) {
             return null;
         }else{
@@ -151,7 +152,8 @@ class DetectionController extends Controller
         if (!$detection) {
             return response()->json(['error' => 'Detection not found'], 404);
         }
-        $user = Auth::guard('api')->user();
+
+        $user = Auth::guard('sanctum')->user();
         if (!$user || ($user->id !== $detection->user_id && $detection->land_id !== $this->retrieveUserLandId())) {
             return response()->json(['error' => 'Unauthorized to view this detection'], 403);
         }
