@@ -133,12 +133,12 @@ class DetectionController extends Controller
             $detection->image_url = $imageUrl;
             $timestamp = strtotime($detection->detected_at);
             $date = date('d/m/Y', $timestamp);
-            $time = date('H:i:s', $timestamp);
+            $time = date('H:i', $timestamp);
             // Create an array with the required data
             $result = [
-                'username' => $detection->user->username, // Assuming you want the currently logged-in user's username
+                'id'=>$detection->id,
+                'username' => $detection->user->username,
                 'image_url' => $imageUrl,
-                'detection' => $detection->detection,
                 'date' => $date,
                 'time' => $time
             ];
