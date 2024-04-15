@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Crop;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationController;
 use App\Http\Requests\ImageRequest;
+use App\Models\Crop;
 use App\Models\Detection;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -28,7 +30,9 @@ class DetectionController extends Controller
                 $this->validateImage($request);
                 $validatedData = $request->validated();
                 //validate crop
-                $validatedCrop = $validatedData['crop']; //remember to add to DB later
+                $validatedCrop = $validatedData['crop'];
+                $crop = Crop::findOrCreate(['name' => $validatedCrop]);
+                $crop_id= $crop->id;
                 //$this->validateImage($validatedData['image']);
                 $response = $this->sendImgToAI($request->file('image'));
 //                if ($response->successful()) {
