@@ -56,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //profile
     Route::post('/profile/password', [ProfileController::class, 'changePassword']);
     Route::delete('/profile', [ProfileController::class, 'deleteAccount']);
+    Route::get('/settings/farmers', [ProfileController::class, 'listFarmers']);
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
     Route::get('/user', function (Request $request) {

@@ -38,5 +38,19 @@ class ProfileController extends Controller
         $user->update(['password' => bcrypt($request->new_password)]);
         return response()->json(['message' => 'Password changed successfully']);
     }
+    //list of farmer for specific land
+    public function listFarmers(Request $request): JsonResponse
+    {
+        $landowner = Auth::user()->landowner;
+        $land = $landowner->lands()->first();
+        $farmers = $land->farmers;
+        //count the number of farmers
+        $farmers_count = $farmers->count();
+        //list farmers name
+        $farmers_name = $farmers->pluck('name');
+
+        return response()->json(['farmers_number' => $farmers_count, 'farmers_name' => $farmers_name]);
+    }
+
 
 }
