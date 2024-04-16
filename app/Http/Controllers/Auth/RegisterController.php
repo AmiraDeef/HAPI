@@ -11,6 +11,8 @@ use App\Models\Farmer;
 use App\Models\Land;
 use App\Models\Landowner;
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Client\Request;
 use Illuminate\Http\JsonResponse;
@@ -78,13 +80,10 @@ class RegisterController extends Controller
      }
     public function registerLandowner(LandownerRegistrationRequest $request): JsonResponse
     {
-
         $validated_data = $request->validated();
-
         if(!$validated_data){
             return response()->json(data: ['errors'=>$request->validator->errors()->messages()], status: 422);
         }
-
 //        if (!$validated_data) {
 //            $errors = [];
 //            foreach ($request->validator->errors()->messages() as $field => $messages) {
@@ -95,22 +94,33 @@ class RegisterController extends Controller
 //            //return one error for each field
 //            return response()->json(['errors' => $errors], 422);
 //        }
-
         $user = $this->registerUser($request->only(['username', 'phone_number', 'password','role']));
         $landowner = $this->createLandowner($user);
         event(new Registered($user));
         $lands = $landowner->lands;
         $first_land = $lands->first();    //return the first one until I change it
         $land_id = $first_land->unique_land_id;
+//        $this->sendLandIdToArduino($land_id);
 
         $token=$this->generateToken($user);
         $success= [
             'token'=>$token,
             'username'=>$user->username,
             'land_id'=>$land_id
-
         ];
         return response()->json($success);
-
     }
+//    private function sendLandIdToArduino(string $landId): void
+//    {
+//
+//        $response = Http::post('127.0.0.1:8000/api/send-land-id', [
+//            'json' => ['land_id' => $landId],
+//        ]);
+//
+//        if ($response->getStatusCode() !== 200) {
+//            Log::error("Failed to send land ID to Arduino (land ID: $landId)");
+//        }
+//    }
+
+
 }
