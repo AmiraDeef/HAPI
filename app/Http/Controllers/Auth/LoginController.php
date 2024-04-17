@@ -6,6 +6,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Crop;
 
 class LoginController extends Controller
 {
@@ -33,6 +34,11 @@ class LoginController extends Controller
 
             if ($user->role === 'landowner' && $user->landowner) {
                 $responseData['land_id'] = $user->landowner->lands->first()->unique_land_id;
+                $crop = Crop::find($user->landowner->lands->first()->crop_id);
+                if(!$crop){
+                   return response()->json(['error' => 'Crop not found'], 404);
+                }
+                $responseData['crop'] = $crop->name;
             }
 
             return response()->json($responseData);
