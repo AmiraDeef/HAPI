@@ -23,24 +23,43 @@ class DetectionController extends Controller
         $this->notificationController = $notificationController;
     }
 
-    public function detect(ImageRequest $request): JsonResponse{
-            try {
-                $this->validateImage($request);
-                $validatedData = $request->validated();
-                //validate crop
-                $validatedCrop = $validatedData['crop'];
-                $crop = Crop::findOrCreate(['name' => $validatedCrop]);
-                $crop_id= $crop->id;
-                //$this->validateImage($validatedData['image']);
-                $response = $this->sendImgToAI($request->file('image'));
-//                if ($response->successful()) {
-                if ($response) {
-                    $this->processDetectionResult($response, $request->file('image'), $crop_id);
-                    return response()->json($response);
-                } else {
-                    return response()->json(['error' => 'Failed to process image.'], 500);
-              }
-            } catch (RequestException $e) {
+    public function detect(ImageRequest $request): JsonResponse
+    {
+        try {
+            $this->validateImage($request);
+            $validatedData = $request->validated();
+            // Validate crop
+            $validatedCrop = $validatedData['crop'];
+            $crop = Crop::findOrCreate(['name' => $validatedCrop]);
+            $crop_id = $crop->id;
+
+            $image = $request->file('image');
+
+            $client = new Client();
+
+            // Make an HTTP request to the crop disease API
+            $response = $client->request('POST', 'https://crop-disease-api-0fqx.onrender.com/', [
+                'multipart' => [
+                    [
+                        'name'     => 'image',
+                        'contents' => fopen($image->path(), 'r'), // Open the image file
+                        'filename' => $image->getClientOriginalName()
+                    ]
+                ],
+                'timeout' => 60
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                $responseData = json_decode($response->getBody(), true); // Decode response as associative array
+                $transformedResponse = $this->transformResponse($responseData);
+                $this->processDetectionResult($responseData, $image, $crop_id);
+                return response()->json($transformedResponse);
+            } else {
+                return response()->json([
+                    'error' => "API request failed. Status code: " . $response->getStatusCode(),
+                ], 500);
+            }
+        } catch (RequestException $e) {
             return response()->json(['error' => 'Failed to connect to AI service.'], 500);
           }
     }
@@ -54,37 +73,12 @@ class DetectionController extends Controller
         return null;
     }
 
-    private function sendImgToAI(UploadedFile $image)
-    {
-        $imageStream = fopen($image->getRealPath(), 'rb');// Open the file in binary mode
-
-        //$response = Http::attach('image', $image)->post("http://127.0.0.1:5000/detect");//url ai
-        $responseContent = [
-            "isHealthy" => false,
-            "confidence" => 0.75,
-            "diseases" => [
-                [
-                    "name" => "Corn Rust",
-                    "confidence" => 0.8,
-                    "infoLink" => "https://en.wikipedia.org/wiki/Corn_rust",
-                ],
-                [
-                    "name" => "Leaf Blight",
-                    "confidence" => 0.65,
-                    "infoLink" => "https://en.wikipedia.org/wiki/Leaf_blight",
-                ],
-            ],
-            //'Image' => Storage::url("detections/{basename($detection->image)}"),
-        ];
-        fclose($imageStream); // Close the file stream
-        return $responseContent;
-    }
     public function processDetectionResult(array $result, UploadedFile $image,int $cropId): void{
         $user = Auth::guard('sanctum')->user();
         //dd($user);
         if($user){
             $landId = $this->retrieveUserLandId();
-            $this->store($user->id, $result, $image,$cropId);
+            $this->store($user->id, $result, $image, $cropId);
             $this->notificationController->createNewDetectionNotification($landId, $user->username);
         }
     }
