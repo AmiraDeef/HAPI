@@ -23,7 +23,7 @@ class ImageRequest extends FormRequest
     {
         return [
             'crop' => 'required|string',
-            'image' =>'mimes:jpeg,png,jpg|required|max:10000',//10MB
+            'image' =>'mimes:jpeg,WEBP_LOSSY,png,jpg|required|max:10000',//10MB
         ];
     }
 }
