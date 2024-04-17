@@ -10,7 +10,6 @@ use App\Models\Detection;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use GuzzleHttp\Client;
@@ -61,8 +60,9 @@ class DetectionController extends Controller
             }
         } catch (RequestException $e) {
             return response()->json(['error' => 'Failed to connect to AI service.'], 500);
-          }
+        }
     }
+
     private function validateImage(ImageRequest $request)
     {
         $validatedData = $request->validated();
@@ -156,7 +156,8 @@ class DetectionController extends Controller
         $enhancedDetection = $this->enhanceDetections(collect([$detection]))->first();
         $cropName = $detection->crop->name;
         $enhancedDetection['crop'] = $cropName;
-        $enhancedDetection['detection'] = $detection->detection;
+        $transformedDetection = $this->transformResponse($detection->detection);
+        $enhancedDetection['detection'] = $transformedDetection;
 
         return response()->json($enhancedDetection);
     }
@@ -183,6 +184,53 @@ class DetectionController extends Controller
         return response()->json($enhancedHistory);
     }
 
+// modifying the response to match with mobile ui
 
+    public function transformResponse($responseData)
+    {
+        $responseContent = [];
+        // Check if $responseData is an object
+        if (is_object($responseData)) {
+            $responseData = (array) $responseData; // Convert object to array
+        }
+        // Check if the plant health indicates the crop is healthy
+        if ($responseData['plant_health'] === 'Corn___Healthy') {
+            $responseContent = [
+                "isHealthy" => true,
+                "confidence" => isset($responseData['confidence']) ? $responseData['confidence'] : null,
+                "diseases" => [],
+            ];
+        } else {
+            // The crop has diseases
+            $responseContent = [
+                "isHealthy" => false,
+                "confidence" => isset($responseData['confidence']) ? $responseData['confidence'] : null,
+                "diseases" => [
+                    [
+                        "name" => $this->convertPlantHealthToDiseaseName($responseData['plant_health']),
+                        "confidence" => isset($responseData['confidence']) ? $responseData['confidence'] : null,
+                        "infoLink" => $this->generateInfoLink($responseData['plant_health']),
+                    ]
+                ],
+            ];
+        }
+        return $responseContent;
+    }
+
+
+// Function to convert plant health to disease name
+    private function convertPlantHealthToDiseaseName($plantHealth)
+    {  $cleanedPlantHealth = str_replace("Corn___", "", $plantHealth);
+        return str_replace("_", " ", $cleanedPlantHealth);
+    }
+
+// Function to generate info link based on disease name
+    private function generateInfoLink($plantHealth)
+    {
+        $cleanedPlantHealth = str_replace("Corn___", "", $plantHealth);
+          return "https://en.wikipedia.org/wiki/".
+            str_replace("_", "%20", $cleanedPlantHealth);
+
+    }
 
 }
