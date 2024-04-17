@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-
+use GuzzleHttp\Client;
 
 class DetectionController extends Controller
 {
