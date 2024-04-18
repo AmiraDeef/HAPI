@@ -1,6 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Client\Request;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +19,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+// routes/web.php
+Route::post('/mock-iot', function (Request $request) {
+    $landId = $request->input('land_id');
+    // Log the received land_id or respond with a success message
+    Log::info("Received land ID in mock IoT endpoint: {$landId}");
+    return response()->json(['message' => $landId.' Land ID received successfully']);
+});
+
