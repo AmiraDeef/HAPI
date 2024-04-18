@@ -16,8 +16,7 @@ class LandHistoryController extends Controller
         if(!$land){
             return response()->json(['error' => 'Land not found'], 404);
         }
-        $land_id=$land->unique_land_id;
-
+        $land_id=$land->id;
         $iotActions= Iot::where('land_id', $land_id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -39,7 +38,7 @@ class LandHistoryController extends Controller
         if(!$land){
             return response()->json(['error' => 'Land not found'], 404);
         }
-        $land_id=$land->unique_land_id;
+        $land_id=$land->id;
 
         $iotAction = Iot::where('land_id', $land_id)
             ->where('id', $id)
@@ -62,7 +61,7 @@ class LandHistoryController extends Controller
         if(!$land){
             return response()->json(['error' => 'Land not found'], 404);
         }
-        $land_id=$land->unique_land_id;
+        $land_id=$land->id;
 
         $latestAction = Iot::where('land_id', $land_id)
             ->orderBy('created_at', 'desc')
@@ -85,8 +84,11 @@ class LandHistoryController extends Controller
         if(!$land){
             return response()->json(['error' => 'Land not found'], 404);
         }
-        $land_id=$land->unique_land_id;
 
+        $land_id=$land->id;
+        $land->load('crop'); //eager load crop
+        //dd($land->crop,$land_id);
+        $crop=$land->crop->name;
         $latestAction = Iot::where('land_id', $land_id)
             ->where('action_type', 'fertilization')
             ->orderBy('created_at', 'desc')
@@ -95,17 +97,17 @@ class LandHistoryController extends Controller
             return response()->json(['error' => 'No fertilization action found'], 404);
         }
         $npk = json_decode($latestAction->data);
-        return response()->json(['npk' => $npk], 200);
+        return response()->json(['crop'=>$crop,'npk' => $npk]);
     }
     //return list of fertilization only or irrigation actions
-    public function actionType($action_type)
+    public function actionsByType($action_type)
     {
         $land=Auth::guard('sanctum')->user()->landowner->lands->first();
         if(!$land){
             return response()->json(['error' => 'Land not found'], 404);
         }
-        $land_id=$land->unique_land_id;
-
+        $land_id=$land->id;
+//        dd($land_id,$action_type);
         $iotActions = Iot::where('land_id', $land_id)
             ->where('action_type', $action_type)
             ->orderBy('created_at', 'desc')
@@ -120,18 +122,19 @@ class LandHistoryController extends Controller
         }
         return response()->json(['actions' => $actions], 200);
     }
-    //reset land history
-//    public function reset()
-//    {
-//        $land=Auth::guard('sanctum')->user()->landowner->lands->first();
-//        if(!$land){
-//            return response()->json(['error' => 'Land not found'], 404);
-//        }
-//        $land_id=$land->unique_land_id;
-//
-//        Iot::where('land_id', $land_id)->delete();
-//        return response()->json(['message' => 'Land history reset'], 200);
-//    }
+//    reset land history
+
+    public function reset()
+    {
+        $land=Auth::guard('sanctum')->user()->landowner->lands->first();
+        if(!$land){
+            return response()->json(['error' => 'Land not found'], 404);
+        }
+        $land_id=$land->unique_land_id;
+
+        Iot::where('land_id', $land_id)->delete();
+        return response()->json(['message' => 'Land history reset'], 200);
+    }
 
 
 

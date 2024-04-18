@@ -7,6 +7,7 @@ use App\Http\Controllers\Crop\DetectionController;
 use App\Http\Controllers\Crop\RecommendationController;
 use App\Http\Controllers\Crop\SelectingManualController;
 use App\Http\Controllers\IOT\IotDataController;
+use App\Http\Controllers\Land\LandHistoryController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
