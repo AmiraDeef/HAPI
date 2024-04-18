@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationController;
 use App\Http\Requests\Auth\FarmerRegistrationRequest;
 use App\Http\Requests\Auth\LandownerRegistrationRequest;
-
+use App\Jobs\SendLandToIot;
 use App\Models\Farmer;
 use App\Models\Land;
 use App\Models\Landowner;
@@ -100,7 +100,8 @@ class RegisterController extends Controller
         $lands = $landowner->lands;
         $first_land = $lands->first();    //return the first one until I change it
         $land_id = $first_land->unique_land_id;
-//        $this->sendLandIdToArduino($land_id);
+
+        SendLandToIot::dispatch($land_id)->delay(30);
 
         $token=$this->generateToken($user);
         $success= [
