@@ -132,9 +132,16 @@ class DetectionController extends Controller
     }
 
 
-    public function history(): JsonResponse
+    public function history(Request $request): JsonResponse
     {
-        $detection_history = Detection::where('land_id', $this->retrieveUserLandId())->orderBy('detected_at', 'desc')->get();
+        $id = $request->query('id');
+        if (!$id) {
+            return response()->json(['error' => 'ID parameter is missing'], 400);
+        }
+        $detection_history = Detection::where('land_id', $this->retrieveUserLandId())
+            ->where('id', '>=', $id)
+            ->orderBy('detected_at', 'desc')
+            ->get();
         if ($detection_history->isEmpty()) {
             return response()->json(['error' => 'No detection history found'], 404);
         }
@@ -161,9 +168,17 @@ class DetectionController extends Controller
 
 //        return response()->json($enhancedDetection);
         $cropName = $detection->crop->name;
-        $enhancedDetection['crop'] = $cropName;
+//        dd($detection->detection);
         $transformedDetection = $this->transformResponse($detection->detection);
-        $enhancedDetection['detection'] = $transformedDetection;
+//        dd($transformedDetection);
+
+        $filteredResponse = [
+            "crop" => $cropName,
+            "detection" => $transformedDetection // Assuming transformedDetection contains disease data
+        ];
+
+        return response()->json($filteredResponse);
+    }
 
         return response()->json($enhancedDetection);
     }
@@ -195,9 +210,14 @@ class DetectionController extends Controller
     public function transformResponse($responseData)
     {
         $responseContent = [];
-        // Check if $responseData is an object
-        if (is_object($responseData)) {
-            $responseData = (array) $responseData; // Convert object to array
+
+        // Check if data is valid JSON
+        if (is_string($responseData) && json_decode($responseData) !== null) {
+            $responseData = json_decode($responseData, true);
+        } else {
+
+            Log::error('Invalid JSON data received in transformResponse');
+            return $responseContent;
         }
         // Check if the plant health indicates the crop is healthy
         if ($responseData['plant_health'] === 'Corn___Healthy') {
