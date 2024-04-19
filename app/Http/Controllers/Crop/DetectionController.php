@@ -7,9 +7,11 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Requests\ImageRequest;
 use App\Models\Crop;
 use App\Models\Detection;
+use Illuminate\Http\Request;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use GuzzleHttp\Client;
@@ -180,8 +182,20 @@ class DetectionController extends Controller
         return response()->json($filteredResponse);
     }
 
-        return response()->json($enhancedDetection);
+//filter by current user
+    public function myDetections(Request $request): JsonResponse{
+        $user = Auth::guard('sanctum')->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        $detections = Detection::where('user_id', $user->id)->get();
+        if ($detections->isEmpty()) {
+            return response()->json(['error' => 'No detection history found'], 404);
+        }
+        $enhancedDetections = $this->enhanceDetections($detections);
+        return response()->json($enhancedDetections);
     }
+
     //fun return last detection
     public function lastOneDetection(): JsonResponse{
 

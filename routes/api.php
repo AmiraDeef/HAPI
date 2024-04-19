@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //detection
     Route::get('/detections/latest', [DetectionController::class, 'lastOneDetection'])->name('detect.last');
     Route::get('/detections/latest-five', [DetectionController::class, 'lastFiveDetection'])->name('detect.lastFive');
+    Route::get('/detections/me', [DetectionController::class, 'myDetections'])->name('detect.my');
     Route::get('/detections', [DetectionController::class, 'history'])->name('detect.history');
     Route::get('/detections/{id}', [DetectionController::class, 'show'])->name('detect.show');
 
