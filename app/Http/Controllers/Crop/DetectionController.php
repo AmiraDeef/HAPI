@@ -153,7 +153,13 @@ class DetectionController extends Controller
             return response()->json(['error' => 'Unauthorized to view this detection'], 403);
         }
 
-        $enhancedDetection = $this->enhanceDetections(collect([$detection]))->first();
+       // $enhancedDetection = $this->enhanceDetections(collect([$detection]))->first();
+//        $cropName = $detection->crop->name;
+//        $enhancedDetection['crop'] = $cropName;
+//        $transformedDetection = $this->transformResponse($detection->detection);
+//        $enhancedDetection['detection'] = $transformedDetection;
+
+//        return response()->json($enhancedDetection);
         $cropName = $detection->crop->name;
         $enhancedDetection['crop'] = $cropName;
         $transformedDetection = $this->transformResponse($detection->detection);
@@ -232,5 +238,21 @@ class DetectionController extends Controller
             str_replace("_", "%20", $cleanedPlantHealth);
 
     }
+
+    //reset the detection history
+//    public function resetDetectionHistory(): JsonResponse
+//    {
+//        $detections = Detection::where('land_id', $this->retrieveUserLandId())->get();
+//        if ($detections->isEmpty()) {
+//            return response()->json(['error' => 'No detection history found'], 404);
+//        }
+//
+//        foreach ($detections as $detection) {
+//            $detection->delete();
+//        }
+//
+//        return response()->json(['message' => 'Detection history reset successfully'], 200);
+//    }
+
 
 }

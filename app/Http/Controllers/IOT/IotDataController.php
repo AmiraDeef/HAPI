@@ -19,10 +19,10 @@ class IotDataController extends Controller
 
         return response()->json(['iot_data' => $iotData], 200);
     }
-    public function sendLand(){
-        $land_id='EFw0Nqn0';
-        return response()->json(['land_id' => $land_id], 200);
-    }
+//    public function sendLand(){
+//        $land_id='EFw0Nqn0';
+//        return response()->json(['land_id' => $land_id], 200);
+//    }
     public function store(Request $request){
         $validated_data = $request->validate([
             'land_id' => [
@@ -31,6 +31,7 @@ class IotDataController extends Controller
                 Rule::exists('lands', 'unique_land_id'),
             ],
             'data' => 'required|json',
+            'action_type' => 'required|string',
         ]);
         $land=Land::where('unique_land_id',$validated_data['land_id'])->first();
         if(!$land){
@@ -39,6 +40,7 @@ class IotDataController extends Controller
         $validated_data['land_id']=$land->id;
         $iot_data=new Iot();
         $iot_data->fill($validated_data);
+        $iot_data->action_time = now();
         $iot_data->save();
         return response()->json(['message' => 'Data saved successfully'], 201);
     }
@@ -56,15 +58,15 @@ class IotDataController extends Controller
         return response()->json(['message' => 'Data updated successfully'], 200);
     }
 
-    public function destroy(Request $request,$id){
-        $iot_data = Iot::where('id', $id)->first();
-        if (!$iot_data) {
-            return response()->json(['error' => 'IoT data not found '], 404);
-        }
-        $iot_data->delete();
-
-        return response()->json(['message' => 'Data deleted successfully'], 200);
-
-    }
+//    public function destroy(Request $request,$id){
+//        $iot_data = Iot::where('id', $id)->first();
+//        if (!$iot_data) {
+//            return response()->json(['error' => 'IoT data not found '], 404);
+//        }
+//        $iot_data->delete();
+//
+//        return response()->json(['message' => 'Data deleted successfully'], 200);
+//
+//    }
 
 }
