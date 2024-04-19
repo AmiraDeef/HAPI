@@ -33,7 +33,7 @@ class Land extends Model
     {
         return $this->hasMany(Detection::class);
     }
-    public function crops()
+    public function crop()
     {
         return $this->belongsTo(Crop::class);
     }
