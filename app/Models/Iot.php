@@ -10,7 +10,9 @@ class Iot extends Model
     use HasFactory;
     protected $table = 'iot_data';
     protected $fillable=[
-        'land_id','data','created_at','updated_at'
+        'land_id','data',
+        'action_type','action_time',
+        'created_at','updated_at'
     ];
     public function land(){
         return $this->belongsTo(Land::class);
