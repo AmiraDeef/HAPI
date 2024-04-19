@@ -25,6 +25,16 @@ use Illuminate\Support\Facades\Storage;
 |
 */
 
+//Route::post('/land', function (Request $request) {
+//    // Access the land_id from the request body (assuming JSON format)
+//    $landId = $request->json('land_id') !== null ? $request->json('land_id') : null;
+//
+//    if (!$landId) {
+//        return response()->json(['error' => 'Missing land_id in request body'], 400); // Handle missing land_id
+//    }
+//    return response()->json(['land_id' => $landId], 200);
+//
+//});
 
 //for iot
 Route::post('/iot/land-data', [IotDataController::class, 'store']);
