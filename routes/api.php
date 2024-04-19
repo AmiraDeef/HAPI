@@ -50,6 +50,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/detections/me', [DetectionController::class, 'myDetections'])->name('detect.my');
     Route::get('/detections', [DetectionController::class, 'history'])->name('detect.history');
     Route::get('/detections/{id}', [DetectionController::class, 'show'])->name('detect.show');
+//    Route::delete('/detections', [DetectionController::class, 'resetDetectionHistory'])->name('detect.delete');
+
+    //land Actions history
+    Route::get('/land/history/{action_type}', [LandHistoryController::class, 'actionsByType'])->name('filter.actionType');
+    Route::get('/land/history', [LandHistoryController::class, 'history'])->name('land.history');
+    Route::get('/land/history/{id}', [LandHistoryController::class, 'show'])->name('land.show');
+    Route::get('/land/latest-action', [LandHistoryController::class, 'latestAction'])->name('land.latestAction');
+    Route::get('/land/NPK', [LandHistoryController::class, 'latestNPK'])->name('land.NPK');
+    //Route::delete('/land/history', [LandHistoryController::class, 'reset'])->name('land.delete-history');
 
     //for notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
