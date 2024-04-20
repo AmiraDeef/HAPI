@@ -140,12 +140,15 @@ class DetectionController extends Controller
         if (!$id) {
             return response()->json(['error' => 'ID parameter is missing'], 400);
         }
+
+        $comparisonOperator = $id === "1" ? '>=' : '>';
         $detection_history = Detection::where('land_id', $this->retrieveUserLandId())
-            ->where('id', '>=', $id)
+            ->where('id', $comparisonOperator, $id)
             ->orderBy('detected_at', 'desc')
             ->get();
+
         if ($detection_history->isEmpty()) {
-            return response()->json(['error' => 'No detection history found'], 404);
+            return response()->json([]);
         }
 
         $enhancedHistory = $this->enhanceDetections($detection_history);
