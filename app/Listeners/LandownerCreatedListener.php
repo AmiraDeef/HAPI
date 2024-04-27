@@ -18,6 +18,7 @@ class LandownerCreatedListener
      *
      * @return void
      */
+    protected $uniqueLandId;
     public function __construct()
     {
         //

@@ -38,10 +38,11 @@ use Illuminate\Support\Facades\Storage;
 
 //for iot
 Route::post('/iot/land-data', [IotDataController::class, 'store']);
-Route::get('/iot/land-data', [IotDataController::class, 'sendLand']);
-Route::get('/iot/land-data/{land_id}', [IotDataController::class, 'index']);
-Route::put('/iot/land-data/{land_id}', [IotDataController::class, 'update']);
-Route::delete('/iot/land-data/{land_id}', [IotDataController::class, 'destroy']);
+Route::get('/iot/land', [IotDataController::class, 'sendLand'])->name('iot.land');
+Route::post('/iot/land/crop', [IotDataController::class, 'cropLand'])->name('iot.crop');
+//Route::get('/iot/land-data/{land_id}', [IotDataController::class, 'index']);
+//Route::put('/iot/land-data/{land_id}', [IotDataController::class, 'update']);
+//Route::delete('/iot/land-data/{land_id}', [IotDataController::class, 'destroy']);
 
 // Authentication Routes
 Route::post('/signup/farmer', [RegisterController::class, 'registerFarmer'])->name('signupFarmer');

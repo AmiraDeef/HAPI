@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\IOT\IotDataController;
+use App\Listeners\LandownerCreatedListener;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;

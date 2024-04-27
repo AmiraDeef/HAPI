@@ -59,19 +59,48 @@ class IotDataController extends Controller
             'data' => 'required|json',
             'action_type' => 'required|string',
         ]);
-        $land=Land::where('unique_land_id',$validated_data['land_id'])->first();
-        if(!$land){
+        $land = Land::where('unique_land_id', $validated_data['land_id'])->first();
+        if (!$land) {
             return response()->json(['error' => 'Land not found'], 404);
         }
-        $validated_data['land_id']=$land->id;
-        $iot_data=new Iot();
+        $validated_data['land_id'] = $land->id;
+        $iot_data = new Iot();
         $iot_data->fill($validated_data);
         $iot_data->action_time = now();
         $iot_data->save();
         return response()->json(['message' => 'Data saved successfully'], 201);
     }
 
-    public function update(Request $request,$id){
+    public function cropLand(Request $request): JsonResponse
+    {
+        $land_id = $request->input('land_id');
+        $land = Land::where('unique_land_id', $land_id)->first();
+
+        if (!$land) {
+            return response()->json(['error' => 'Land not found'], 404);
+        }
+
+        $crop = $land->crop->name;
+
+        if (!$crop) {
+            return response()->json(['error' => 'There is no crop for this land yet'], 404);
+        }
+        $crop_data = Crop::where('name', $crop)->first();
+
+        if (!$crop_data) {
+            return response()->json(['error' => 'Crop data not found'], 404);
+        }
+
+        return response()->json([
+            'crop' => $crop_data->name,
+            'optimal_n' => $crop_data->nitrogen,
+            'optimal_p' => $crop_data->phosphorus,
+            'optimal_k' => $crop_data->potassium,
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
         $iot_data = Iot::where('id', $id)->first();
         if (!$iot_data) {
             return response()->json(['error' => 'IoT data not found for the specified land_id'], 404);
