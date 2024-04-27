@@ -3,12 +3,7 @@
 namespace App\Listeners;
 
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
-use App\Models\Land;
 use Illuminate\Support\Str;
-use App\Models\User;
-
 
 
 class LandownerCreatedListener
@@ -34,10 +29,16 @@ class LandownerCreatedListener
     {
         $landowner = $event->user->landowner;
         if ($landowner->lands()->count() === 0) {
-            // If no lands associated, create a new land
+            // If no lands associated, create a new land with a unique ID
+            $this->uniqueLandId = Str::random(8);
             $landowner->lands()->create([
-                'unique_land_id' => Str::random(8)
+                'unique_land_id' => $this->uniqueLandId
             ]);
-        } //i'll add more lands later
+        } // Add logic for multiple lands later
+    }
+
+    public function getUniqueLandId(): ?string
+    {
+        return $this->uniqueLandId;
     }
 }
