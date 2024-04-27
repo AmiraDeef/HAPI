@@ -3,10 +3,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Crop;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Crop;
+use function response;
 
 class LoginController extends Controller
 {
@@ -26,19 +27,21 @@ class LoginController extends Controller
             $token = $user->createToken('authToken')->plainTextToken;
             $responseData = [
                 'token' => $token,
-                'username'=>$user->username,
+                'username' => $user->username,
                 'role' => $user->role,
-
+                'land_id' => null,
             ];
-
 
             if ($user->role === 'landowner' && $user->landowner) {
                 $responseData['land_id'] = $user->landowner->lands->first()->unique_land_id;
                 $crop = Crop::find($user->landowner->lands->first()->crop_id);
-                if(!$crop){
-                   return response()->json(['error' => 'Crop not found'], 404);
+                if (!$crop) {
+                    $responseData['crop'] = null;
+                    return response()->json($responseData);
                 }
                 $responseData['crop'] = $crop->name;
+            } elseif ($user->role === 'farmer' && $user->farmer) {
+                $responseData['land_id'] = $user->farmer->land_id;
             }
 
             return response()->json($responseData);
@@ -51,6 +54,6 @@ class LoginController extends Controller
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
-        return \response()->json(['message'=>'Logged out successfully']);
+        return response()->json(['message' => 'Logged out successfully']);
     }
 }

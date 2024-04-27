@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use http\Env\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+
 class ProfileController extends Controller
 {
     /** @noinspection PhpUndefinedFieldInspection */
@@ -50,9 +50,11 @@ class ProfileController extends Controller
         //count the number of farmers
         $farmers_count = $farmers->count();
         //list farmers name
-        $farmers_name = $farmers->pluck('name');
+        $farmers_names = $farmers->map(function ($farmer) {
+            return $farmer->user->username;
+        });
 
-        return response()->json(['farmers_number' => $farmers_count, 'farmers_name' => $farmers_name]);
+        return response()->json(['farmers_number' => $farmers_count, 'farmers_name' => $farmers_names]);
     }
 
 

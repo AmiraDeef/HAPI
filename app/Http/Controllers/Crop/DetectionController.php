@@ -7,14 +7,14 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Requests\ImageRequest;
 use App\Models\Crop;
 use App\Models\Detection;
-use Illuminate\Http\Request;
+use GuzzleHttp\Client;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use GuzzleHttp\Client;
 
 class DetectionController extends Controller
 {
@@ -42,7 +42,7 @@ class DetectionController extends Controller
             $response = $client->request('POST', 'https://crop-disease-api-0fqx.onrender.com/', [
                 'multipart' => [
                     [
-                        'name'     => 'image',
+                        'name' => 'image',
                         'contents' => fopen($image->path(), 'r'), // Open the image file
                         'filename' => $image->getClientOriginalName()
                     ]
@@ -50,9 +50,11 @@ class DetectionController extends Controller
                 'timeout' => 60
             ]);
 
-            if ($response->getStatusCode() === 200) {
-                $responseData = json_decode($response->getBody(), true); // Decode response as associative array
-                $transformedResponse = $this->transformResponse($responseData);
+            if ($response->getStatusCode() == 200) {
+                $responseData = json_decode($response->getBody(), true);
+                // $responseData = json_encode($responseData);
+                //                dd($responseData);
+                $transformedResponse = $this->transformResponseForDetect($responseData);
                 $this->processDetectionResult($responseData, $image, $crop_id);
                 return response()->json($transformedResponse);
             } else {
@@ -75,33 +77,36 @@ class DetectionController extends Controller
         return null;
     }
 
-    public function processDetectionResult(array $result, UploadedFile $image,int $cropId): void{
+    public function processDetectionResult(array $result, UploadedFile $image, int $cropId): void
+    {
         $user = Auth::guard('sanctum')->user();
         //dd($user);
-        if($user){
+        if ($user) {
             $landId = $this->retrieveUserLandId();
             $this->store($user->id, $result, $image, $cropId);
             $this->notificationController->createNewDetectionNotification($landId, $user->username);
         }
     }
+
     public function retrieveUserLandId(): ?int
     {
         $user = Auth::guard('sanctum')->user();
-//        ($user);
+        //        ($user);
         if (!$user) {
             return null;
-        }else{
+        } else {
             if ($user->role === 'landowner') {
                 return $user->landowner->lands()->first()->id;
-            } else{
+            } else {
                 return $user->farmer->land_id;
             }
         }
     }
 
-    public function store($user_id,$result,$image,$crop_id){
+    public function store($user_id, $result, $image, $crop_id)
+    {
 
-        $path = $image->storeAs('detections', $image->getClientOriginalName(),'public');
+        $path = $image->storeAs('detections', $image->getClientOriginalName(), 'public');
         $detection = new Detection();
         $detection->user_id = $user_id;
         $detection->land_id = $this->retrieveUserLandId();
@@ -121,7 +126,6 @@ class DetectionController extends Controller
             $timestamp = strtotime($detection->detected_at);
             $date = date('d/m/Y', $timestamp);
             $time = date('H:i A', $timestamp);
-            // Create an array with the required data
             $result = [
                 'id' => $detection->id,
                 'username' => $detection->user->username,
@@ -154,7 +158,9 @@ class DetectionController extends Controller
         $enhancedHistory = $this->enhanceDetections($detection_history);
         return response()->json($enhancedHistory);
     }
-    public function show($id){
+
+    public function show($id)
+    {
         $detection = Detection::find($id);
         if (!$detection) {
             return response()->json(['error' => 'Detection not found'], 404);
@@ -165,28 +171,17 @@ class DetectionController extends Controller
             return response()->json(['error' => 'Unauthorized to view this detection'], 403);
         }
 
-       // $enhancedDetection = $this->enhanceDetections(collect([$detection]))->first();
-//        $cropName = $detection->crop->name;
-//        $enhancedDetection['crop'] = $cropName;
-//        $transformedDetection = $this->transformResponse($detection->detection);
-//        $enhancedDetection['detection'] = $transformedDetection;
-
-//        return response()->json($enhancedDetection);
+        $enhancedDetection = $this->enhanceDetections(collect([$detection]))->first();
         $cropName = $detection->crop->name;
-//        dd($detection->detection);
-        $transformedDetection = $this->transformResponse($detection->detection);
-//        dd($transformedDetection);
-
-        $filteredResponse = [
-            "crop" => $cropName,
-            "detection" => $transformedDetection // Assuming transformedDetection contains disease data
-        ];
-
-        return response()->json($filteredResponse);
+        $enhancedDetection['crop'] = $cropName;
+        $transformedDetection = $this->transformResponse(json_encode($detection->detection));
+        $enhancedDetection['detection'] = $transformedDetection;
+        return response()->json($enhancedDetection);
     }
 
-//filter by current user
-    public function myDetections(Request $request): JsonResponse{
+    //filter by current user
+    public function myDetections(Request $request): JsonResponse
+    {
         $user = Auth::guard('sanctum')->user();
         if (!$user) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -199,33 +194,12 @@ class DetectionController extends Controller
         return response()->json($enhancedDetections);
     }
 
-    //fun return last detection
-    public function lastOneDetection(): JsonResponse{
 
-        $detections = Detection::where('land_id', $this->retrieveUserLandId())->latest('detected_at')->limit(1)->get();
-        $enhancedDetections = $this->enhanceDetections($detections);
-
-        if ($enhancedDetections->isEmpty()) {
-            return response()->json(['error' => 'Detection not found'], 404);
-        }
-
-        return response()->json($enhancedDetections->first());
-    }
-    //return last 5 detection
-    public function lastFiveDetection(): JsonResponse{
-
-        $detections=Detection::where('land_id',$this->retrieveUserLandId())->latest('detected_at')->limit(5)->get();
-        if($detections->isEmpty()){
-            return response()->json(['error' => 'No detection found'], 404);
-        }
-        $enhancedHistory = $this->enhanceDetections($detections);
-        return response()->json($enhancedHistory);
-    }
-
-// modifying the response to match with mobile ui
+    // modifying the response to match with mobile ui
 
     public function transformResponse($responseData)
     {
+        //        dd($responseData);
         $responseContent = [];
 
         // Check if data is valid JSON
@@ -260,36 +234,67 @@ class DetectionController extends Controller
         return $responseContent;
     }
 
+    public function transformResponseForDetect($responseData)
+    {
+        $responseContent = [];
+        $plantHealth = $responseData['plant_health'] ?? null;
+        $confidence = isset($responseData['confidence']) ? $responseData['confidence'] : null;
 
-// Function to convert plant health to disease name
+        // Check if the plant health indicates the crop is healthy
+        if ($plantHealth === 'Corn___Healthy') {
+            $responseContent = [
+                "isHealthy" => true,
+                "confidence" => $confidence,
+                "diseases" => [],
+            ];
+        } else {
+            // The crop has diseases
+            $responseContent = [
+                "isHealthy" => false,
+                "confidence" => $confidence,
+                "diseases" => [
+                    [
+                        "name" => $this->convertPlantHealthToDiseaseName($plantHealth),
+                        "confidence" => $confidence,
+                        "infoLink" => $this->generateInfoLink($plantHealth),
+                    ]
+                ],
+            ];
+        }
+
+        return $responseContent;
+    }
+
+
+    // Function to convert plant health to disease name
     private function convertPlantHealthToDiseaseName($plantHealth)
-    {  $cleanedPlantHealth = str_replace("Corn___", "", $plantHealth);
+    {
+        $cleanedPlantHealth = str_replace("Corn___", "", $plantHealth);
         return str_replace("_", " ", $cleanedPlantHealth);
     }
 
-// Function to generate info link based on disease name
+    // Function to generate info link based on disease name
     private function generateInfoLink($plantHealth)
     {
         $cleanedPlantHealth = str_replace("Corn___", "", $plantHealth);
-          return "https://en.wikipedia.org/wiki/".
+        return "https://en.wikipedia.org/wiki/" .
             str_replace("_", "%20", $cleanedPlantHealth);
-
     }
 
     //reset the detection history
-//    public function resetDetectionHistory(): JsonResponse
-//    {
-//        $detections = Detection::where('land_id', $this->retrieveUserLandId())->get();
-//        if ($detections->isEmpty()) {
-//            return response()->json(['error' => 'No detection history found'], 404);
-//        }
-//
-//        foreach ($detections as $detection) {
-//            $detection->delete();
-//        }
-//
-//        return response()->json(['message' => 'Detection history reset successfully'], 200);
-//    }
+    //    public function resetDetectionHistory(): JsonResponse
+    //    {
+    //        $detections = Detection::where('land_id', $this->retrieveUserLandId())->get();
+    //        if ($detections->isEmpty()) {
+    //            return response()->json(['error' => 'No detection history found'], 404);
+    //        }
+    //
+    //        foreach ($detections as $detection) {
+    //            $detection->delete();
+    //        }
+    //
+    //        return response()->json(['message' => 'Detection history reset successfully'], 200);
+    //    }
 
 
 }
