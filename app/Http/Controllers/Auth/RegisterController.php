@@ -3,32 +3,36 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\IOT\IotDataController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Requests\Auth\FarmerRegistrationRequest;
 use App\Http\Requests\Auth\LandownerRegistrationRequest;
-use App\Jobs\SendLandToIot;
 use App\Models\Farmer;
 use App\Models\Land;
 use App\Models\Landowner;
 use App\Models\User;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\Client\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 
 
-
 class RegisterController extends Controller
 {
-    protected function registerUser(array $user_data):User
+    protected $iotDataController;
+
+    public function __construct(IotDataController $iotDataController)
+    {
+        $this->iotDataController = $iotDataController;
+    }
+
+    protected function registerUser(array $user_data): User
     {
         $user_data['password'] = Hash::make($user_data['password']);
         return User::create($user_data);
 
     }
-    protected function createFarmer(User $user,array $farmer_data):Farmer
+
+    protected function createFarmer(User $user, array $farmer_data): Farmer
     {
         return Farmer::create([
             'user_id' => $user->id,
@@ -70,9 +74,9 @@ class RegisterController extends Controller
 
         $token=$this->generateToken($user);
         $success= [
-        'token'=>$token,
-            'username'=>$user->username,
-            'land_id'=>$land->unique_land_id
+            'token' => $token,
+            'username' => $user->username,
+            'land_id' => $land->unique_land_id
 
         ];
         return response()->json($success);
@@ -94,20 +98,25 @@ class RegisterController extends Controller
 //            //return one error for each field
 //            return response()->json(['errors' => $errors], 422);
 //        }
-        $user = $this->registerUser($request->only(['username', 'phone_number', 'password','role']));
+        $user = $this->registerUser($request->only(['username', 'phone_number', 'password', 'role']));
         $landowner = $this->createLandowner($user);
         event(new Registered($user));
         $lands = $landowner->lands;
-        $first_land = $lands->first();    //return the first one until I change it
+        $first_land = $lands->first();
+        // dd($first_land);//return the first one until I change it
         $land_id = $first_land->unique_land_id;
+        $landId = $first_land ? $first_land->unique_land_id : null;
 
-        SendLandToIot::dispatch($land_id)->delay(30);
+//        SendLandToIot::dispatch($land_id);
 
-        $token=$this->generateToken($user);
-        $success= [
-            'token'=>$token,
-            'username'=>$user->username,
-            'land_id'=>$land_id
+        $this->iotDataController->sendLand($landId);
+
+
+        $token = $this->generateToken($user);
+        $success = [
+            'token' => $token,
+            'username' => $user->username,
+            'land_id' => $land_id
         ];
         return response()->json($success);
     }

@@ -3,27 +3,53 @@
 namespace App\Http\Controllers\IOT;
 
 use App\Http\Controllers\Controller;
+use App\Models\Crop;
 use App\Models\Iot;
 use App\Models\Land;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class IotDataController extends Controller
 {
-    public function index($land_id){
-        $land=Land::where('unique_land_id',$land_id)->first();
-        if(!$land){
+    //passing the land_id to the iot device
+
+    protected $landId;
+
+
+    public function __construct(string $landId = null)
+    {
+        $this->landId = $landId;
+    }
+
+    public function index($land_id)
+    {
+        $land = Land::where('unique_land_id', $land_id)->first();
+        if (!$land) {
             return response()->json(['error' => 'Land not found'], 404);
         }
         $iotData = Iot::where('land_id', $land->id)->get();
 
         return response()->json(['iot_data' => $iotData], 200);
     }
-//    public function sendLand(){
-//        $land_id='EFw0Nqn0';
-//        return response()->json(['land_id' => $land_id], 200);
-//    }
-    public function store(Request $request){
+
+//
+    public function sendLand(): JsonResponse
+    {
+        if ($this->landId) {
+            return response()->json(['land_id' => $this->landId], 200);
+        } else {
+            $land = Land::orderBy('id', 'desc')->first();
+            if ($land) {
+                return response()->json(['land_id' => $land->unique_land_id], 200);
+            } else {
+                return response()->json(['error' => 'No land available'], 404);
+            }
+        }
+    }
+
+    public function store(Request $request)
+    {
         $validated_data = $request->validate([
             'land_id' => [
                 'required',
