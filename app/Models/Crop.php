@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Crop extends Model
 {
     use HasFactory;
-    protected $fillable=[
+    protected $fillable = [
         'name',
-        'crop_description',
+        'description',
 
     ];
 
@@ -32,12 +32,19 @@ class Crop extends Model
     {
         return $this->belongsTo(Land::class);
     }
+
     public function landHistory()
     {
         return $this->hasMany(CropLandHistory::class);
     }
+
     public function detections()
     {
         return $this->hasMany(Detection::class);
+    }
+
+    public function diseases()
+    {
+        return $this->hasMany(Disease::class);
     }
 }

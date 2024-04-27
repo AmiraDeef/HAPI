@@ -9,10 +9,10 @@ use App\Http\Controllers\Crop\SelectingManualController;
 use App\Http\Controllers\IOT\IotDataController;
 use App\Http\Controllers\Land\LandHistoryController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Website\library\CropController;
+use App\Http\Controllers\Website\library\DiseaseController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Storage;
 //
 //});
 
+
 //for iot
 Route::post('/iot/land-data', [IotDataController::class, 'store']);
 Route::get('/iot/land', [IotDataController::class, 'sendLand'])->name('iot.land');
@@ -56,19 +57,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/crop/recommendation', [RecommendationController::class, 'recommend']);
 
     //detection
-    Route::get('/detections/latest', [DetectionController::class, 'lastOneDetection'])->name('detect.last');
-    Route::get('/detections/latest-five', [DetectionController::class, 'lastFiveDetection'])->name('detect.lastFive');
     Route::get('/detections/me', [DetectionController::class, 'myDetections'])->name('detect.my');
     Route::get('/detections', [DetectionController::class, 'history'])->name('detect.history');
     Route::get('/detections/{id}', [DetectionController::class, 'show'])->name('detect.show');
-//    Route::delete('/detections', [DetectionController::class, 'resetDetectionHistory'])->name('detect.delete');
+    //    Route::delete('/detections', [DetectionController::class, 'resetDetectionHistory'])->name('detect.delete');
 
     //land Actions history
+    Route::get('/land/history/{id}', [LandHistoryController::class, 'show'])->name('land.show');
     Route::get('/land/history/{action_type}', [LandHistoryController::class, 'actionsByType'])->name('filter.actionType');
     Route::get('/land/history', [LandHistoryController::class, 'history'])->name('land.history');
-    Route::get('/land/history/{id}', [LandHistoryController::class, 'show'])->name('land.show');
     Route::get('/land/latest-action', [LandHistoryController::class, 'latestAction'])->name('land.latestAction');
-    Route::get('/land/NPK', [LandHistoryController::class, 'latestNPK'])->name('land.NPK');
+    Route::get('/land/data', [LandHistoryController::class, 'landUpdates'])->name('land.data');
+    Route::get('land/latestFarmer', [LandHistoryController::class, 'latestFarmer'])->name('latest.farmer');
     //Route::delete('/land/history', [LandHistoryController::class, 'reset'])->name('land.delete-history');
 
     //for notifications
@@ -90,3 +90,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::post('/detect', [DetectionController::class, 'detect'])->middleware('auth_optional:sanctum')->name('detect');
 
+
+//for website
+
+Route::get('/crops', [cropController::class, 'index'])->name('crops');
+Route::get('/crops/{id}/diseases', [CropController::class, 'show'])->name('crop.diseases');
+
+Route::get('/diseases', [DiseaseController::class, 'index'])->name('diseases');
+Route::get('/diseases/search?query={query}', [DiseaseController::class, 'search'])->name('diseases.search');
+Route::get('/crops/{id}/diseases/{disease_id}', [DiseaseController::class, 'show'])->name('crop.disease');
