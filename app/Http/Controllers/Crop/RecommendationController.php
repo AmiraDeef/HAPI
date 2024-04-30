@@ -2,18 +2,12 @@
 
 namespace App\Http\Controllers\Crop;
 
-use App\Events\LandInformationReceived;
 use App\Http\Controllers\Controller;
-use App\Models\Crop;
 use App\Models\Iot;
-use App\Models\CropLandHistory;
-use Carbon\Carbon;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-
 
 
 class RecommendationController extends Controller
@@ -21,19 +15,29 @@ class RecommendationController extends Controller
     private $landInfo;
     public function recommend(Request $request){
 
-        if(! Auth::user()->role == 'landowner'){
+        if (!Auth::user()->role == 'landowner') {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
         $land = Auth::user()->landowner->lands()->first();
-        $iot_data = Iot::where('land_id', $land->id)->latest()->first();
-        if (!$iot_data) {
-            return response()->json(['error' => 'No IoT data found for the specified land'], 404);
+        $latest_fertilization = Iot::where('land_id', $land->id)
+            ->where('action_type', 'fertilization')
+            ->latest()
+            ->first();
+        //dd($latest_fertilization);
+        if (!$latest_fertilization) {
+            return response()->json(['error' => 'No data found for the specified land'], 404);
         }
+        $npk = json_decode($latest_fertilization->data);
+        $npk = [
+            'N' => (int)$npk->N,
+            'P' => (int)$npk->P,
+            'K' => (int)$npk->K
+        ];
         try {
 //            $response = Http::post('https://e376e3b7-2a57-4420-9342-3717ad9cec0a.mock.pstmn.io/land-info', [
 //                'land_id' => $land->unique_land_id,
 //            ]);
-            $cropRecommendations = $this->getCropRecommendation($iot_data->data);
+            $cropRecommendations = $this->getCropRecommendation($npk);
             // Return the crop recommendations
             return response()->json($cropRecommendations, 200);
 
@@ -49,7 +53,8 @@ class RecommendationController extends Controller
     private function getCropRecommendation($landInfo)
     {
         // Convert JSON string to associative array
-        $data = json_decode($landInfo, true);
+//        $data = json_decode($landInfo, true);
+        $data = $landInfo;
         if ($data === null) {
             return response()->json(['error' => 'Invalid land information format.'], 400);
         }

@@ -108,6 +108,11 @@ class LandHistoryController extends Controller
             return response()->json([]);
         }
         $npk = json_decode($latest_fertilization->data);
+        $npk = [
+            'N' => $npk->N_level,
+            'P' => $npk->P_level,
+            'K' => ($npk->K_level)
+        ];
         $water_level = json_decode($latest_irrigation->data);
         return response()->json([
             'water_level' => $water_level->water_level, 'npk' => $npk
