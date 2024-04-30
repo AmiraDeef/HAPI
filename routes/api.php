@@ -93,6 +93,9 @@ Route::post('/detect', [DetectionController::class, 'detect'])->middleware('auth
 
 //for website
 
+
+Route::post('/contact', [ContactController::class, 'store']);
+
 Route::get('/crops', [cropController::class, 'index'])->name('crops');
 Route::get('/crops/{id}/diseases', [CropController::class, 'show'])->name('crop.diseases');
 
