@@ -23,16 +23,26 @@ class DiseaseController extends Controller
         );
     }
 
-    public function search(Request $request)
+    public function search($id, Request $request)
     {
         try {
+//
             $query = $request->query('query');
-            $results = Disease::where('name', 'like', "%$query%")->get();
+            $results = Disease::where('crop_id', $id)
+                ->where('name', 'like', "%$query%")
+                ->get();
 
             if ($results->isEmpty()) {
                 return response()->json(['message' => 'No results found']);
             }
-            return response()->json($results);
+
+            return response()->json($results
+                ->map(function ($result) {
+                    return [
+                        'id' => $result->id,
+                        'name' => $result->name,
+                    ];
+                }));
         } catch (QueryException $e) {
             return response()->json(['message' => 'An error occurred while searching']);
         }

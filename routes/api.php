@@ -9,6 +9,7 @@ use App\Http\Controllers\Crop\SelectingManualController;
 use App\Http\Controllers\IOT\IotDataController;
 use App\Http\Controllers\Land\LandHistoryController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Website\ContactController;
 use App\Http\Controllers\Website\library\CropController;
 use App\Http\Controllers\Website\library\DiseaseController;
 use Illuminate\Http\Request;
@@ -97,8 +98,9 @@ Route::post('/detect', [DetectionController::class, 'detect'])->middleware('auth
 Route::post('/contact', [ContactController::class, 'store']);
 
 Route::get('/crops', [cropController::class, 'index'])->name('crops');
-Route::get('/crops/{id}/diseases', [CropController::class, 'show'])->name('crop.diseases');
+Route::get('/crops/{id}', [CropController::class, 'show'])->name('crop.show');
+Route::get('/crops/{id}/diseases', [CropController::class, 'show_diseases'])->name('crop.diseases');
 
+Route::get('/crops/{id}/diseases/search', [DiseaseController::class, 'search'])->name('diseases.search');
 Route::get('/diseases', [DiseaseController::class, 'index'])->name('diseases');
-Route::get('/diseases/search?query={query}', [DiseaseController::class, 'search'])->name('diseases.search');
 Route::get('/crops/{id}/diseases/{disease_id}', [DiseaseController::class, 'show'])->name('crop.disease');
