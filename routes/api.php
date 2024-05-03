@@ -65,9 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //land Actions history
     Route::get('/land/history/{id}', [LandHistoryController::class, 'show'])->name('land.show');
-    Route::get('/land/history/{action_type}', [LandHistoryController::class, 'actionsByType'])->name('filter.actionType');
     Route::get('/land/history', [LandHistoryController::class, 'history'])->name('land.history');
-    Route::get('/land/latest-action', [LandHistoryController::class, 'latestAction'])->name('land.latestAction');
     Route::get('/land/data', [LandHistoryController::class, 'landUpdates'])->name('land.data');
     Route::get('land/latestFarmer', [LandHistoryController::class, 'latestFarmer'])->name('latest.farmer');
     //Route::delete('/land/history', [LandHistoryController::class, 'reset'])->name('land.delete-history');
@@ -77,8 +75,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/notifications/{id}/read', [NotificationController::class, 'seenNotification'])->name('seen');
     Route::post('/notifications/messages', [NotificationController::class, 'createMessageNotification'])->name('message');
     //profile
-    Route::post('/profile/password', [ProfileController::class, 'changePassword']);
-    Route::delete('/profile', [ProfileController::class, 'deleteAccount']);
+    Route::post('/setting/password', [ProfileController::class, 'changePassword']);
+    Route::post('/setting/check-password', [ProfileController::class, 'check_password']);
+    Route::delete('/setting', [ProfileController::class, 'deleteAccount']);
     Route::get('/settings/farmers', [ProfileController::class, 'listFarmers']);
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 

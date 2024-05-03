@@ -79,7 +79,6 @@ class IotDataController extends Controller
         if (!$land) {
             return response()->json(['error' => 'Land not found'], 404);
         }
-
         $crop = $land->crop->name;
 
         if (!$crop) {
@@ -93,9 +92,9 @@ class IotDataController extends Controller
 
         return response()->json([
             'crop' => $crop_data->name,
-            'optimal_n' => $crop_data->nitrogen,
-            'optimal_p' => $crop_data->phosphorus,
-            'optimal_k' => $crop_data->potassium,
+            'optimal_n' => (int)$crop_data->nitrogen,
+            'optimal_p' => (int)$crop_data->phosphorus,
+            'optimal_k' => (int)$crop_data->potassium,
         ]);
     }
 

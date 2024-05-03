@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Crop;
 use App\Http\Controllers\Controller;
 use App\Models\Crop;
 use App\Models\CropLandHistory;
+use App\Models\Iot;
 use carbon\carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,6 +24,11 @@ class SelectingManualController extends Controller
         }
         //get the land of the landowner
         $land = Auth::user()->landowner->lands->first();
+        if (!$land) {
+            return response()->json(['error' => 'Land not found'], 404);
+        }
+        CropLandHistory::where('land_id', $land->id)->delete();
+        Iot::where('land_id', $land->id)->delete();
 //        $existing_history = CropLandHistory::where('land_id', $land->id)
 //            ->orderBy('planted_at', 'desc')
 //            ->first();

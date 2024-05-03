@@ -11,21 +11,16 @@ use Illuminate\Support\Facades\Hash;
 class ProfileController extends Controller
 {
     /** @noinspection PhpUndefinedFieldInspection */
-    public function changeCrop(Request $request)
+    public function check_password(Request $request)
     {
-        $landowner=Auth::user()->landowner;
+        $landowner = Auth::user()->landowner;
 
         if (!Hash::check($request->input('password'), Auth::user()->password)) {
             return response()->json(['error' => 'Incorrect password'], 401);
         }
-        //rest return to crop setup
-        $land= $landowner->lands()->first();
-        //
-
-
-        // crop selection but this after build crop controller ")
         return response()->json([]);
     }
+
     public function deleteAccount(Request $request): JsonResponse
     {
         if (!Hash::check($request->input('password'), Auth::user()->password)) {
@@ -47,14 +42,12 @@ class ProfileController extends Controller
         $landowner = Auth::user()->landowner;
         $land = $landowner->lands()->first();
         $farmers = $land->farmers;
-        //count the number of farmers
-        $farmers_count = $farmers->count();
         //list farmers name
         $farmers_names = $farmers->map(function ($farmer) {
             return $farmer->user->username;
         });
 
-        return response()->json(['farmers_number' => $farmers_count, 'farmers_name' => $farmers_names]);
+        return response()->json($farmers_names);
     }
 
 

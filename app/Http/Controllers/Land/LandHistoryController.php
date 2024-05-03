@@ -22,7 +22,6 @@ class LandHistoryController extends Controller
             return response()->json(['error' => 'Land not found'], 404);
         }
         $land_id = $land->id;
-        //dd($land_id, $id);
         $comparisonOperator = $id === "1" ? '>=' : '>';
         $iotActions = Iot::where('land_id', $land_id)
             ->where('id', $comparisonOperator, $id)
@@ -64,29 +63,6 @@ class LandHistoryController extends Controller
         ];
         return response()->json(['action' => $action], 200);
     }
-    //latest action
-    public function latestAction()
-    {
-        $land = Auth::guard('sanctum')->user()->landowner->lands->first();
-        if (!$land) {
-            return response()->json(['error' => 'Land not found'], 404);
-        }
-        $land_id = $land->id;
-
-        $latestAction = Iot::where('land_id', $land_id)
-            ->orderBy('created_at', 'desc')
-            ->first();
-        if (!$latestAction) {
-            return response()->json(['error' => 'No action found'], 404);
-        }
-        $action = [
-            'id' => $latestAction->id,
-            'action_type' => $latestAction->action_type,
-            'date' => $latestAction->created_at->format('Y-m-d'),
-            'time' => $latestAction->created_at->format('H:i A')
-        ];
-        return response()->json(['action' => $action], 200);
-    }
 
     public function landUpdates()
     {
@@ -119,30 +95,6 @@ class LandHistoryController extends Controller
         ]);
     }
 
-    //return list of fertilization only or irrigation actions
-    public function actionsByType($action_type)
-    {
-        $land = Auth::guard('sanctum')->user()->landowner->lands->first();
-        if (!$land) {
-            return response()->json(['error' => 'Land not found'], 404);
-        }
-        $land_id = $land->id;
-        //        dd($land_id,$action_type);
-        $iotActions = Iot::where('land_id', $land_id)
-            ->where('action_type', $action_type)
-            ->orderBy('created_at', 'desc')
-            ->get();
-        $actions = [];
-        foreach ($iotActions as $action) {
-            $actions[] = [
-                'id' => $action->id,
-                'date' => $action->created_at->format('Y-m-d'),
-                'time' => $action->created_at->format('H:i A')
-            ];
-        }
-        return response()->json(['actions' => $actions], 200);
-    }
-
     //last farmer
     public function latestFarmer()
     {
@@ -158,7 +110,6 @@ class LandHistoryController extends Controller
         if (!$farmer) {
             return response()->json([]);
         }
-        //dd($farmer);
 
         //return username
         return response()->json([
