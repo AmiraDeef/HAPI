@@ -18,6 +18,7 @@ class DiseaseController extends Controller
                     'id' => $disease->id,
                     'name' => $disease->name,
                     'crop' => $disease->crop->name,
+                    'image' => $disease->image,
                 ];
             })
         );
@@ -36,11 +37,13 @@ class DiseaseController extends Controller
                 return response()->json(['message' => 'No results found']);
             }
 
+
             return response()->json($results
                 ->map(function ($result) {
                     return [
                         'id' => $result->id,
                         'name' => $result->name,
+                        'image' => $result->image,
                     ];
                 }));
         } catch (QueryException $e) {
@@ -55,9 +58,11 @@ class DiseaseController extends Controller
         if (!$disease) {
             return response()->json(['message' => 'Disease not found'], 404);
         }
+
         return response()->json([
             'id' => $disease->id,
             'name' => $disease->name,
+            'image' => $disease->image,
             'causes' => $disease->causes,
             'spread' => $disease->spread,
             'symptoms' => $disease->symptoms,

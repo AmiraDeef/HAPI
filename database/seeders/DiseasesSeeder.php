@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Crop;
 use App\Models\Disease;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class DiseasesSeeder extends Seeder
 {
@@ -13,10 +14,13 @@ class DiseasesSeeder extends Seeder
      */
     public function run(): void
     {
+//        Disease::truncate();
+//        Disease::flushEventListeners();
         $diseases = [
             [
                 'crop' => 'tomato',
                 'name' => 'bacterial spot',
+                'image' => '1.jpg',
                 'causes' => 'Bacterial infection by Xanthomonas perforans or Xanthomonas vesicatoria',
                 'spread' => 'Splashing water, wind, rain, insects, contaminated tools',
                 'prevention' => 'Disease-resistant varieties, crop rotation, clean garden',
@@ -26,6 +30,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'tomato',
                 'name' => 'early blight',
+                'image' => '2.jpg',
                 'causes' => 'Fungal infection by Alternaria solani',
                 'spread' => 'Wind, rain, splashing water',
                 'prevention' => 'Water at base, improve air circulation by pruning, crop rotation, disease-resistant varieties',
@@ -35,6 +40,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'tomato',
                 'name' => 'late blight',
+                'image' => '3.jpg',
                 'causes' => 'Fungal infection by Phytophthora infestans',
                 'spread' => 'Cool, moist weather, wind, rain',
                 'prevention' => 'Fungicide sprays, crop rotation, resistant varieties',
@@ -44,6 +50,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'tomato',
                 'name' => 'septoria leaf spot',
+                'image' => '4.jpg',
                 'causes' => 'Fungal infection by Septoria lycopersici',
                 'spread' => 'Wind, rain, splashing water',
                 'prevention' => 'Crop rotation, sanitation (remove plant debris), watering at base',
@@ -53,6 +60,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'tomato',
                 'name' => 'yellow leaf curl virus',
+                'image' => '5.jpg',
                 'causes' => 'Tomato yellow leaf curl virus (TYLCV) transmitted by whiteflies',
                 'spread' => 'Whiteflies',
                 'prevention' => 'Control whiteflies (insect traps, insecticidal soap), use insect netting',
@@ -62,6 +70,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'potato',
                 'name' => 'early blight',
+                'image' => '6.jpeg',
                 'causes' => 'Fungal infection by Alternaria solani (the same fungus that causes Early Blight in tomatoes)',
                 'spread' => 'Wind, rain, splashing water',
                 'prevention' => 'Fungicide sprays, crop rotation, resistant varieties',
@@ -71,6 +80,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'potato',
                 'name' => 'late blight',
+                'image' => '7.jpg',
                 'causes' => 'Fungal infection by Phytophthora infestans (the same fungus that causes Late Blight in tomatoes)',
                 'spread' => 'Cool, moist weather, wind, rain',
                 'prevention' => 'Fungicide sprays, crop rotation, resistant varieties',
@@ -80,6 +90,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'corn',
                 'name' => 'cercospora leaf spot',
+                'image' => '8.jpeg',
                 'causes' => 'Fungal infection by Cercospora zeae-maydis',
                 'spread' => 'Wind, rain, splashing water',
                 'prevention' => 'Crop rotation, resistant varieties, avoid overhead irrigation',
@@ -89,6 +100,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'corn',
                 'name' => 'common rust',
+                'image' => '9.jpg',
                 'causes' => 'Fungal infection by several fungal species',
                 'spread' => 'Wind, rain',
                 'prevention' => 'Resistant varieties, remove volunteer corn plants (these can harbor rust spores)',
@@ -98,6 +110,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'corn',
                 'name' => 'northern leaf blight',
+                'image' => '10.JPG',
                 'causes' => 'Fungal infection by Exserohilum turcicum',
                 'spread' => 'Wind, rain',
                 'prevention' => 'Resistant varieties, crop rotation',
@@ -107,6 +120,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'apple',
                 'name' => 'apple scab',
+                'image' => '11.jpg',
                 'causes' => 'Fungal infection by Venturia inaequalis',
                 'spread' => 'Rain splashing spores from fallen leaves',
                 'prevention' => 'Dormant fungicide sprays, sanitation (remove fallen leaves)',
@@ -116,6 +130,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'apple',
                 'name' => 'black rot',
+                'image' => '12.jpg',
                 'causes' => 'Fungal infection by Botryosphaeria obtusa',
                 'spread' => 'Spores spread by wind and rain',
                 'prevention' => 'Prune for good air circulation, avoid injuring fruit, harvest apples at maturity',
@@ -125,6 +140,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'apple',
                 'name' => 'cedar apple rust',
+                'image' => '13.jpeg',
                 'causes' => 'Fungal infection with two hosts: juniper and apple trees',
                 'spread' => 'Wind carries spores from juniper trees',
                 'prevention' => 'Remove cedar trees near apple orchards if feasible, fungicide sprays on apple trees',
@@ -134,6 +150,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'cotton',
                 'name' => 'bacterial blight',
+                'image' => '14.jpg',
                 'causes' => 'Bacterial infection by Xanthomonas axonopodis pv. malvacearum',
                 'spread' => 'Rain, splashing water, insects',
                 'prevention' => 'Certified disease-free seed, crop rotation, destroy infected debris',
@@ -143,6 +160,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'cotton',
                 'name' => 'curl virus',
+                'image' => '15.jpg',
                 'causes' => 'Several viruses including Cotton Leaf Curl Virus (CLCV) transmitted by whiteflies',
                 'spread' => 'Whiteflies',
                 'prevention' => 'Control whiteflies, use insect netting',
@@ -152,6 +170,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'cotton',
                 'name' => 'fusarium wilt',
+                'image' => '16.jpg',
                 'causes' => 'Fungal infection by Fusarium oxysporum',
                 'spread' => 'Lives in soil for many years',
                 'prevention' => 'Resistant varieties, crop rotation with non-susceptible crops',
@@ -161,6 +180,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'sugarcane',
                 'name' => 'mosaic',
+                'image' => '17.jpg',
                 'causes' => 'Virus spread by aphids',
                 'spread' => 'Aphids',
                 'prevention' => 'Control aphids (insecticidal soap), use disease-free seed cane',
@@ -170,6 +190,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'sugarcane',
                 'name' => 'red rot',
+                'image' => '18.jpg',
                 'causes' => 'Fungal infection by Trichoderma harzianum',
                 'spread' => 'Spores spread by wind and rain',
                 'prevention' => 'Avoid mechanical damage to sugarcane stalks, proper sanitation',
@@ -179,6 +200,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'sugarcane',
                 'name' => 'rust',
+                'image' => '19.png',
                 'causes' => 'Fungal infection by Puccinia kuehnii',
                 'spread' => 'Spores spread by wind',
                 'prevention' => 'Resistant varieties',
@@ -188,6 +210,7 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'sugarcane',
                 'name' => 'yellow leaf curl virus',
+                'image' => '20.jpg',
                 'causes' => 'Virus spread by leafhoppers',
                 'spread' => 'Leafhoppers',
                 'prevention' => 'Control leafhoppers (insecticides), use resistant varieties',
@@ -197,13 +220,13 @@ class DiseasesSeeder extends Seeder
             [
                 'crop' => 'wheat',
                 'name' => 'brown rust',
+                'image' => '21.jpg',
                 'causes' => 'Fungal infection by Puccinia triticina',
                 'spread' => 'Wind carries spores long distances',
                 'prevention' => 'Resistant varieties',
                 'treatment' => 'No effective treatment',
                 'symptoms' => 'Brown, powdery pustules on leaves, pustules may become necrotic'
             ],
-            // Add other diseases here...
         ];
 
 
@@ -213,6 +236,15 @@ class DiseasesSeeder extends Seeder
                 $this->command->error('Crop not found: ' . $disease['crop']);
                 continue;
             }
+
+            $imageUrl = '';
+            if (!empty($disease['image']) && Storage::disk('public')->exists("diseases/{$disease['image']}")) {
+                $imageUrl = Storage::url("diseases/{$disease['image']}");
+                $this->command->info('Image found: ' . $disease['image'] . ' URL: ' . $imageUrl);
+            } else {
+                $this->command->error('Image not found: ' . $disease['image']);
+            }
+
             Disease::create([
                 'crop_id' => $crop->id,
                 'name' => $disease['name'],
@@ -220,7 +252,8 @@ class DiseasesSeeder extends Seeder
                 'spread' => $disease['spread'],
                 'prevention' => $disease['prevention'],
                 'treatment' => $disease['treatment'],
-                'symptoms' => $disease['symptoms']
+                'symptoms' => $disease['symptoms'],
+                'image' => $imageUrl,
             ]);
         }
     }
