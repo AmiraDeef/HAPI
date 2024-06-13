@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\CropLandHistory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,10 +24,13 @@ class ProfileController extends Controller
 
     public function deleteAccount(Request $request): JsonResponse
     {
+
         if (!Hash::check($request->input('password'), Auth::user()->password)) {
             return response()->json(['error' => 'Incorrect password'], 401);
         }
+        CropLandHistory::where('land_id', $request->user()->landowner->lands->first()->id)->delete();
         $request->user()->delete();
+
         return response()->json(['message' => 'Account deleted successfully']);
     }
     //there is no change password yet

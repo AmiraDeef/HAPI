@@ -30,7 +30,7 @@ class CropController extends Controller
         return response()->json([
             'name' => $crop->name,
             'description' => $crop->description,
-            'image' => $crop->image,
+            'image' => $crop->crop_image,
         ]);
     }
 
