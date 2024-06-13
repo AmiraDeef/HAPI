@@ -12,7 +12,6 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 
@@ -29,39 +28,38 @@ class DetectionController extends Controller
         try {
             $this->validateImage($request);
             $validatedData = $request->validated();
-            // Validate crop
+
+            // Validate and retrieve crop data
             $validatedCrop = $validatedData['crop'];
-            $crop = Crop::findOrCreate(['name' => $validatedCrop]);
+            $crop = Crop::firstOrCreate(['name' => $validatedCrop]);
             $crop_id = $crop->id;
 
             $image = $request->file('image');
 
             $client = new Client();
 
-            // Make an HTTP request to the crop disease API
-            $response = $client->request('POST', 'https://crop-disease-api-0fqx.onrender.com/', [
+            $response = $client->request('POST', 'http://127.0.0.1:1000/', [
+                'query' => [
+                    'crop_name' => $validatedCrop
+                ],
                 'multipart' => [
                     [
                         'name' => 'image',
-                        'contents' => fopen($image->path(), 'r'), // Open the image file
+                        'contents' => fopen($image->getPathname(), 'r'),
                         'filename' => $image->getClientOriginalName()
                     ]
                 ],
                 'timeout' => 60
             ]);
 
-            if ($response->getStatusCode() == 200) {
+            if ($response->getStatusCode() === 200) {
                 $responseData = json_decode($response->getBody(), true);
-                // $responseData = json_encode($responseData);
-                //                dd($responseData);
                 $transformedResponse = $this->transformResponseForDetect($responseData);
                 $this->processDetectionResult($responseData, $image, $crop_id);
+
                 return response()->json($transformedResponse);
-            } else {
-                return response()->json([
-                    'error' => "API request failed. Status code: " . $response->getStatusCode(),
-                ], 500);
             }
+            return response()->json(['error' => "API request failed. Status code: " . $response->getStatusCode()], 500);
         } catch (RequestException $e) {
             return response()->json(['error' => 'Failed to connect to AI service.'], 500);
         }
@@ -106,7 +104,7 @@ class DetectionController extends Controller
     public function store($user_id, $result, $image, $crop_id)
     {
 
-        $path = $image->storeAs('detections', $image->getClientOriginalName(), 'public');
+        $path = $image->storeAs('/detections', $image->getClientOriginalName(), 'public');
         $detection = new Detection();
         $detection->user_id = $user_id;
         $detection->land_id = $this->retrieveUserLandId();
@@ -116,27 +114,42 @@ class DetectionController extends Controller
         $detection->detected_at = now();
         $detection->save();
     }
-    private function enhanceDetections($detections)
+
+    private function enhanceDetections($detections, $details = false)
     {
-        return $detections->map(function ($detection) {
-            $detection->detection = json_decode($detection->detection);
-            $img_name = basename($detection->image);
-            $imageUrl = Storage::url("detections/{$img_name}");
-            $detection->image_url = $imageUrl;
+        return $detections->map(function ($detection) use ($details) {
+            $detectionData = json_decode($detection->detection, true);
+            $imgName = basename($detection->image);
+            $imageUrl = Storage::url("detections/{$imgName}");
             $timestamp = strtotime($detection->detected_at);
             $date = date('d/m/Y', $timestamp);
             $time = date('H:i A', $timestamp);
+
             $result = [
                 'id' => $detection->id,
                 'username' => $detection->user->username,
                 'image_url' => $imageUrl,
                 'date' => $date,
-                'time' => $time
+                'time' => $time,
+
             ];
+            if ($details) {
+                $diseaseName = $detectionData['plant_health'][1] ?? 'Unknown';
+                $diseaseName = str_replace("_", ' ', $diseaseName);
+
+                $certainty = $detectionData['confidence'] ?? 0;
+                $certainty = str_replace('%', '', $certainty);
+                $infoLink = $this->generateInfoLink($diseaseName);
+
+
+                $result['disease_name'] = $diseaseName;
+                $result['certainty'] = $certainty;
+                $result['info_link'] = $infoLink;
+                $result['crop'] = $detection->crop->name;
+            }
             return $result;
         });
     }
-
 
     public function history(Request $request): JsonResponse
     {
@@ -146,17 +159,17 @@ class DetectionController extends Controller
         }
 
         $comparisonOperator = $id === "1" ? '>=' : '>';
-        $detection_history = Detection::where('land_id', $this->retrieveUserLandId())
+        $detectionHistory = Detection::where('land_id', $this->retrieveUserLandId())
             ->where('id', $comparisonOperator, $id)
             ->orderBy('detected_at', 'desc')
             ->get();
 
-        if ($detection_history->isEmpty()) {
+        if ($detectionHistory->isEmpty()) {
             return response()->json([]);
         }
 
-        $enhancedHistory = $this->enhanceDetections($detection_history);
-        return response()->json($enhancedHistory);
+        return response()->json($this->enhanceDetections($detectionHistory));
+
     }
 
     public function show($id)
@@ -171,12 +184,34 @@ class DetectionController extends Controller
             return response()->json(['error' => 'Unauthorized to view this detection'], 403);
         }
 
-        $enhancedDetection = $this->enhanceDetections(collect([$detection]))->first();
-        $cropName = $detection->crop->name;
-        $enhancedDetection['crop'] = $cropName;
-        $transformedDetection = $this->transformResponse(json_encode($detection->detection));
-        $enhancedDetection['detection'] = $transformedDetection;
+        $enhancedDetection = $this->enhanceDetections(collect([$detection]), true)->first();
+
         return response()->json($enhancedDetection);
+    }
+
+
+    // modifying the response to match with mobile ui
+
+    private function transformResponseForDetect($responseData)
+    {
+        $plantHealth = $responseData['plant_health'][1] ?? 'Unknown';
+        $certainty = $responseData['confidence'] ?? '0%';
+        //remove %
+        $certainty = str_replace('%', '', $certainty);
+        $plantHealth = str_replace("_", ' ', $plantHealth);
+
+        $diseaseName = strtolower($plantHealth) === 'healthy' ? '' : $plantHealth;
+
+        return [
+            'disease_name' => $diseaseName,
+            'certainty' => $certainty,
+            'info_link' => $this->generateInfoLink($plantHealth)
+        ];
+    }
+
+    private function generateInfoLink($plantHealth)
+    {
+        return "https://en.wikipedia.org/wiki/" . str_replace(" ", "%20", $plantHealth);
     }
 
     //filter by current user
@@ -190,96 +225,9 @@ class DetectionController extends Controller
         if ($detections->isEmpty()) {
             return response()->json(['error' => 'No detection history found'], 404);
         }
-        $enhancedDetections = $this->enhanceDetections($detections);
-        return response()->json($enhancedDetections);
+        return response()->json($this->enhanceDetections($detections));
     }
 
-
-    // modifying the response to match with mobile ui
-
-    public function transformResponse($responseData)
-    {
-        //        dd($responseData);
-        $responseContent = [];
-
-        // Check if data is valid JSON
-        if (is_string($responseData) && json_decode($responseData) !== null) {
-            $responseData = json_decode($responseData, true);
-        } else {
-
-            Log::error('Invalid JSON data received in transformResponse');
-            return $responseContent;
-        }
-        // Check if the plant health indicates the crop is healthy
-        if ($responseData['plant_health'] === 'Corn___Healthy') {
-            $responseContent = [
-                "isHealthy" => true,
-                "confidence" => isset($responseData['confidence']) ? $responseData['confidence'] : null,
-                "diseases" => [],
-            ];
-        } else {
-            // The crop has diseases
-            $responseContent = [
-                "isHealthy" => false,
-                "confidence" => isset($responseData['confidence']) ? $responseData['confidence'] : null,
-                "diseases" => [
-                    [
-                        "name" => $this->convertPlantHealthToDiseaseName($responseData['plant_health']),
-                        "confidence" => isset($responseData['confidence']) ? $responseData['confidence'] : null,
-                        "infoLink" => $this->generateInfoLink($responseData['plant_health']),
-                    ]
-                ],
-            ];
-        }
-        return $responseContent;
-    }
-
-    public function transformResponseForDetect($responseData)
-    {
-        $responseContent = [];
-        $plantHealth = $responseData['plant_health'] ?? null;
-        $confidence = isset($responseData['confidence']) ? $responseData['confidence'] : null;
-
-        // Check if the plant health indicates the crop is healthy
-        if ($plantHealth === 'Corn___Healthy') {
-            $responseContent = [
-                "isHealthy" => true,
-                "confidence" => $confidence,
-                "diseases" => [],
-            ];
-        } else {
-            // The crop has diseases
-            $responseContent = [
-                "isHealthy" => false,
-                "confidence" => $confidence,
-                "diseases" => [
-                    [
-                        "name" => $this->convertPlantHealthToDiseaseName($plantHealth),
-                        "confidence" => $confidence,
-                        "infoLink" => $this->generateInfoLink($plantHealth),
-                    ]
-                ],
-            ];
-        }
-
-        return $responseContent;
-    }
-
-
-    // Function to convert plant health to disease name
-    private function convertPlantHealthToDiseaseName($plantHealth)
-    {
-        $cleanedPlantHealth = str_replace("Corn___", "", $plantHealth);
-        return str_replace("_", " ", $cleanedPlantHealth);
-    }
-
-    // Function to generate info link based on disease name
-    private function generateInfoLink($plantHealth)
-    {
-        $cleanedPlantHealth = str_replace("Corn___", "", $plantHealth);
-        return "https://en.wikipedia.org/wiki/" .
-            str_replace("_", "%20", $cleanedPlantHealth);
-    }
 
     //reset the detection history
     //    public function resetDetectionHistory(): JsonResponse
