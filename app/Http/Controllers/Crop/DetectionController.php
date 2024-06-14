@@ -36,6 +36,7 @@ class DetectionController extends Controller
 
             $image = $request->file('image');
 
+
             $client = new Client();
 
             $response = $client->request('POST', 'http://127.0.0.1:1000/', [
@@ -143,9 +144,10 @@ class DetectionController extends Controller
 
 
                 $result['disease_name'] = $diseaseName;
-                $result['certainty'] = $certainty;
+                $result['certainty'] = (float)$certainty;
                 $result['info_link'] = $infoLink;
                 $result['crop'] = $detection->crop->name;
+                unset($result['id']);
             }
             return $result;
         });
@@ -204,7 +206,7 @@ class DetectionController extends Controller
 
         return [
             'disease_name' => $diseaseName,
-            'certainty' => $certainty,
+            'certainty' => (float)$certainty,
             'info_link' => $this->generateInfoLink($plantHealth)
         ];
     }
