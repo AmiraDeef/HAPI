@@ -63,6 +63,21 @@ class IotDataController extends Controller
         if (!$land) {
             return response()->json(['error' => 'Land not found'], 404);
         }
+
+        $newData = json_decode($validated_data['data'], true);
+
+        $existingRecord = Iot::where('land_id', $land->id)
+            ->where('action_type', $validated_data['action_type'])
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($existingRecord) {
+            $existingData = json_decode($existingRecord->data, true);
+            if ($newData == $existingData) {
+                return response()->json(['message' => 'Duplicate record ignored'], 200);
+            }
+        }
+
         $validated_data['land_id'] = $land->id;
         $iot_data = new Iot();
         $iot_data->fill($validated_data);
