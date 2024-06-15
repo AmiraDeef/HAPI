@@ -13,6 +13,7 @@ class CropLandHistory extends Model
         'crop_id',
         'planted_at',
         'harvested_at',
+        'nitrogen_applied', 'phosphorus_applied', 'potassium_applied'
     ];
     public $timestamps = false;
     public function land()

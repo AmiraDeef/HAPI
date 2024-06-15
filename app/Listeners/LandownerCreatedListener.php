@@ -37,9 +37,9 @@ class LandownerCreatedListener
             ]);
 
             $npk = [
-                'N' => mt_rand(0, 80),  // Nitrogen
-                'P' => mt_rand(0, 80),  // Phosphorus
-                'K' => mt_rand(0, 80),  // Potassium
+                'N' => mt_rand(0, 80),
+                'P' => mt_rand(0, 80),
+                'K' => mt_rand(0, 80),
             ];
             $this->data = json_encode($npk);
             $landowner->lands()->first()->iot()->create([

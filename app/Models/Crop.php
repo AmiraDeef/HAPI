@@ -11,6 +11,7 @@ class Crop extends Model
     protected $fillable = [
         'name',
         'description',
+        'nitrogen', 'phosphorus', 'potassium'
 
     ];
 
