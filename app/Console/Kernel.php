@@ -2,18 +2,29 @@
 
 namespace App\Console;
 
+use App\Console\Commands\SimulateNpksensor;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
+    /**
+     * The Artisan commands provided by your application.
+     *
+     * @var array
+     */
+    protected $commands = [
+        SimulateNpksensor::class,
+    ];
+
     /**
      * Define the application's command schedule.
      */
     protected function schedule(Schedule $schedule): void
     {
-
-        $schedule->command('simulate:npksensor')->everyFifteenMinutes();
+        Log::info('Scheduler is running.');
+        $schedule->command('simulate:npksensor')->everyMinute();
 
     }
 
