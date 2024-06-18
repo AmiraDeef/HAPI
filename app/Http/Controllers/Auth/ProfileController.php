@@ -12,14 +12,19 @@ use Illuminate\Support\Facades\Hash;
 class ProfileController extends Controller
 {
     /** @noinspection PhpUndefinedFieldInspection */
-    public function check_password(Request $request)
-    {
-        $landowner = Auth::user()->landowner;
 
-        if (!Hash::check($request->input('password'), Auth::user()->password)) {
+    public function check_password(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+        if (!Hash::check($request->input('password'), $user->password)) {
             return response()->json(['error' => 'Incorrect password'], 401);
         }
-        return response()->json([]);
+
+        return response()->json(null);
     }
 
     public function deleteAccount(Request $request): JsonResponse
@@ -31,7 +36,7 @@ class ProfileController extends Controller
         CropLandHistory::where('land_id', $request->user()->landowner->lands->first()->id)->delete();
         $request->user()->delete();
 
-        return response()->json(['message' => 'Account deleted successfully']);
+        return response()->json(null);
     }
     //there is no change password yet
     public function changePassword(Request $request): JsonResponse

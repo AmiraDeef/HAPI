@@ -81,7 +81,7 @@ class LandHistoryController extends Controller
             ->orderBy('created_at', 'desc')
             ->first();
         if (!$latest_fertilization || !$latest_irrigation) {
-            return response()->json([]);
+            return response()->json(null);
         }
         $npk = json_decode($latest_fertilization->data);
         $npk = [

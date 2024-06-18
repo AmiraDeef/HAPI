@@ -14,13 +14,13 @@ class LoginController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
-// Validate the login request
+
         $validatedData = $request->validated();
         if (!$validatedData) {
             return response()->json(['error' => $request->validator->errors()->messages()], 422);
         }
 
-// Attempt to authenticate the user
+
         $credentials = $request->only('phone_number', 'password');
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
@@ -47,13 +47,12 @@ class LoginController extends Controller
             return response()->json($responseData);
         }
 
-        // Invalid credentials
         return response()->json(['message' => 'Invalid Number or password'], 401);
     }
 
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logged out successfully']);
+        return response()->json(null);
     }
 }

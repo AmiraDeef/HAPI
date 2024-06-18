@@ -50,6 +50,7 @@ class RecommendationController extends Controller
     private function getCropRecommendation($landInfo)
     {
         $data = $landInfo;
+
         if ($data === null) {
             return response()->json(['error' => 'Invalid land information format.'], 400);
         }
