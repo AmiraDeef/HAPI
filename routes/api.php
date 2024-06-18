@@ -74,9 +74,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::put('/notifications/{id}/read', [NotificationController::class, 'seenNotification'])->name('seen');
     Route::post('/notifications/messages', [NotificationController::class, 'createMessageNotification'])->name('message');
-    //profile
-    Route::post('/setting/password', [ProfileController::class, 'changePassword']);
+    //settings
     Route::post('/settings/check-password', [ProfileController::class, 'check_password']);
+    Route::post('/settings/password', [ProfileController::class, 'changePassword']);
     Route::delete('/settings/account', [ProfileController::class, 'deleteAccount']);
     Route::get('/settings/farmers', [ProfileController::class, 'listFarmers']);
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
