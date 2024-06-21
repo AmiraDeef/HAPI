@@ -106,10 +106,14 @@ class IotDataController extends Controller
         }
 
         return response()->json([
-            'crop' => $crop_data->name,
-            'optimal_n' => (int)$crop_data->nitrogen,
-            'optimal_p' => (int)$crop_data->phosphorus,
-            'optimal_k' => (int)$crop_data->potassium,
+            'crop' => $crop_data->crop->name,
+            'applied_n' => (int)$crop_data->nitrogen_applied,
+            'applied_p' => (int)$crop_data->phosphorus_applied,
+            'applied_k' => (int)$crop_data->potassium_applied,
+            'optimal_n' => (int)$crop_data->crop->nitrogen,
+            'optimal_p' => (int)$crop_data->crop->phosphorus,
+            'optimal_k' => (int)$crop_data->crop->potassium,
+
         ]);
     }
 

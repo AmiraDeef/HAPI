@@ -48,7 +48,7 @@ class LandownerCreatedListener
                 'action_time' => now()
             ]);
 
-        } // Add logic for multiple lands later
+        }
     }
 
     public function getUniqueLandId(): ?string

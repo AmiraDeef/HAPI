@@ -27,7 +27,7 @@ class DiseaseController extends Controller
     public function search($id, Request $request)
     {
         try {
-//
+
             $query = $request->query('query');
             $results = Disease::where('crop_id', $id)
                 ->where('name', 'like', "%$query%")
@@ -36,7 +36,6 @@ class DiseaseController extends Controller
             if ($results->isEmpty()) {
                 return response()->json(['message' => 'No results found']);
             }
-
 
             return response()->json($results
                 ->map(function ($result) {

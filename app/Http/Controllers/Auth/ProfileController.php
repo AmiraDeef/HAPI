@@ -29,10 +29,6 @@ class ProfileController extends Controller
 
     public function deleteAccount(Request $request): JsonResponse
     {
-
-        if (!Hash::check($request->input('password'), Auth::user()->password)) {
-            return response()->json(['error' => 'Incorrect password'], 401);
-        }
         CropLandHistory::where('land_id', $request->user()->landowner->lands->first()->id)->delete();
         $request->user()->delete();
 
