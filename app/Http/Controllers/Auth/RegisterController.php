@@ -103,7 +103,6 @@ class RegisterController extends Controller
         event(new Registered($user));
         $lands = $landowner->lands;
         $first_land = $lands->first();
-        // dd($first_land);//return the first one until I change it
         $land_id = $first_land->unique_land_id;
         $landId = $first_land ? $first_land->unique_land_id : null;
 
@@ -116,7 +115,8 @@ class RegisterController extends Controller
         $success = [
             'token' => $token,
             'username' => $user->username,
-            'land_id' => $land_id
+            'land_id' => $land_id,
+
         ];
         return response()->json($success);
     }

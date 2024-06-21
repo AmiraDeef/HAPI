@@ -48,6 +48,8 @@ class LandownerCreatedListener
                 'action_time' => now()
             ]);
 
+            //dd($this->data);
+
         }
     }
 
