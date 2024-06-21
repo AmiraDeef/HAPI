@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\IOT;
 
 use App\Http\Controllers\Controller;
-use App\Models\Crop;
+use App\Models\CropLandHistory;
 use App\Models\Iot;
 use App\Models\Land;
 use Illuminate\Http\JsonResponse;
@@ -91,20 +91,20 @@ class IotDataController extends Controller
         $land_id = $request->input('land_id');
         $land = Land::where('unique_land_id', $land_id)->first();
 
+
         if (!$land) {
             return response()->json(['error' => 'Land not found'], 404);
         }
-        $crop = $land->crop->name;
+        $crop = $land->crop;
 
         if (!$crop) {
             return response()->json(['error' => 'There is no crop for this land yet'], 404);
         }
-        $crop_data = Crop::where('name', $crop)->first();
+        $crop_data = CropLandHistory::where('land_id', $land->id)->first();
 
         if (!$crop_data) {
             return response()->json(['error' => 'Crop data not found'], 404);
         }
-
         return response()->json([
             'crop' => $crop_data->crop->name,
             'applied_n' => (int)$crop_data->nitrogen_applied,
