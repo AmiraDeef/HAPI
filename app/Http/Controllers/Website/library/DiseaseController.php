@@ -50,12 +50,17 @@ class DiseaseController extends Controller
         }
     }
 
-
-    public function show($id)
+    public function show($id, $disease_id)
     {
-        $disease = Disease::find($id);
+
+        $disease = Disease::where('crop_id', $id)->where('id', $disease_id)->first();
+
         if (!$disease) {
             return response()->json(['message' => 'Disease not found'], 404);
+        }
+
+        if ($disease->crop_id != $id) {
+            return response()->json(['message' => 'Disease does not belong to the specified crop'], 404);
         }
 
         return response()->json([
@@ -67,9 +72,7 @@ class DiseaseController extends Controller
             'symptoms' => $disease->symptoms,
             'prevention' => $disease->prevention,
             'treatment' => $disease->treatment,
-
         ]);
     }
-
 
 }

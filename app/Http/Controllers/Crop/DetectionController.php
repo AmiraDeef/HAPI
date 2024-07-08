@@ -7,6 +7,8 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Requests\ImageRequest;
 use App\Models\Crop;
 use App\Models\Detection;
+use App\Models\Disease;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
@@ -55,7 +57,10 @@ class DetectionController extends Controller
 
             if ($response->getStatusCode() === 200) {
                 $responseData = json_decode($response->getBody(), true);
-                $transformedResponse = $this->transformResponseForDetect($responseData);
+                $transformedResponse = $this->transformResponseForDetect($responseData, $crop_id);
+                if ($transformedResponse['certainty'] < 50) {
+                    return response()->json(['error' => 'The AI model is not confident about the detection.'], 400);
+                }
                 $this->processDetectionResult($responseData, $image, $crop_id);
 
                 return response()->json($transformedResponse);
@@ -112,7 +117,8 @@ class DetectionController extends Controller
         $detection->image = $path;
         $detection->detection = json_encode($result);
         $detection->crop_id = $crop_id;
-        $detection->detected_at = now();
+        $now = Carbon::now('Africa/Cairo')->addHour();
+        $detection->detected_at = $now;
         $detection->save();
     }
 
@@ -137,10 +143,11 @@ class DetectionController extends Controller
             if ($details) {
                 $diseaseName = $detectionData['plant_health'][1] ?? 'Unknown';
                 $diseaseName = str_replace("_", ' ', $diseaseName);
+                $diseaseName = strtolower($diseaseName) === 'healthy' ? '' : $diseaseName;
 
                 $certainty = $detectionData['confidence'] ?? 0;
                 $certainty = str_replace('%', '', $certainty);
-                $infoLink = $this->generateInfoLink($diseaseName);
+                $infoLink = $this->generateInfoLink($diseaseName, $detection->crop->id);
 
 
                 $result['disease_name'] = $diseaseName;
@@ -194,7 +201,7 @@ class DetectionController extends Controller
 
     // modifying the response to match with mobile ui
 
-    private function transformResponseForDetect($responseData)
+    private function transformResponseForDetect($responseData, $crop_id)
     {
         $plantHealth = $responseData['plant_health'][1] ?? 'Unknown';
         $certainty = $responseData['confidence'] ?? '0%';
@@ -207,44 +214,21 @@ class DetectionController extends Controller
         return [
             'disease_name' => $diseaseName,
             'certainty' => (float)$certainty,
-            'info_link' => $this->generateInfoLink($plantHealth)
+            'info_link' => $this->generateInfoLink($plantHealth, $crop_id),
         ];
     }
 
-    private function generateInfoLink($plantHealth)
+    private function generateInfoLink($plantHealth, $crop_id): string
     {
-        return "https://en.wikipedia.org/wiki/" . str_replace(" ", "%20", $plantHealth);
-    }
-
-    //filter by current user
-    public function myDetections(Request $request): JsonResponse
-    {
-        $user = Auth::guard('sanctum')->user();
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($plantHealth === 'healthy') {
+            return "https://mariamabdulhaleem3.github.io/HAPI-Website/#/Library/{$crop_id}";
+        } else {
+            $disease_id = Disease::where('crop_id', $crop_id)->where('name', $plantHealth)->first()->id;
+            return "https://mariamabdulhaleem3.github.io/HAPI-Website/#/Library/{$crop_id}/diseases/{$disease_id}";
         }
-        $detections = Detection::where('user_id', $user->id)->get();
-        if ($detections->isEmpty()) {
-            return response()->json(['error' => 'No detection history found'], 404);
-        }
-        return response()->json($this->enhanceDetections($detections));
+
+
     }
-
-
-    //reset the detection history
-    //    public function resetDetectionHistory(): JsonResponse
-    //    {
-    //        $detections = Detection::where('land_id', $this->retrieveUserLandId())->get();
-    //        if ($detections->isEmpty()) {
-    //            return response()->json(['error' => 'No detection history found'], 404);
-    //        }
-    //
-    //        foreach ($detections as $detection) {
-    //            $detection->delete();
-    //        }
-    //
-    //        return response()->json(['message' => 'Detection history reset successfully'], 200);
-    //    }
 
 
 }
