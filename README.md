@@ -38,6 +38,11 @@ This repository contains **only the backend API**, developed using **Laravel**, 
 
 ---
 
+## Notes
+- This is only the backend API, and does not include AI models, IoT devices, or frontend apps.
+- Designed with focus on Egyptian agriculture needs, but flexible to expand.
+
+
 ## Installation
 
 ```bash
@@ -60,7 +65,3 @@ php artisan migrate
 # Serve the application
 php artisan serve
 
-
-# Notes
-- This is only the backend API, and does not include AI models, IoT devices, or frontend apps.
-- Designed with focus on Egyptian agriculture needs, but flexible to expand.
